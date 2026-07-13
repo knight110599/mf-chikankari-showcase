@@ -1,24 +1,85 @@
 function Navbar() {
   return (
-    <nav className="w-full px-8 py-5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <h1
-          className="text-3xl text-[#0F4C3A]"
-          style={{ fontFamily: "Cormorant Garamond" }}
-        >
-          MF Chikankari
-        </h1>
+    <nav className="sticky top-0 z-50 w-full border-b border-[#E8DCC5] bg-[#F8F5F0]/90 backdrop-blur-md">
+      <div className="mx-auto flex h-28 w-full max-w-7xl items-center justify-between px-8 lg:px-12">
 
-        <ul
-          className="hidden md:flex gap-8 text-[#2E2A27]"
-          style={{ fontFamily: "Poppins" }}
+        {/* Logo */}
+        <a
+          href="#"
+          className="flex flex-col transition-transform duration-300 hover:scale-[1.02]"
         >
-          <li>Home</li>
-          <li>About</li>
-          <li>Collections</li>
-          <li>Gallery</li>
-          <li>Contact</li>
-        </ul>
+          <span
+            className="text-[11px] uppercase tracking-[0.4em] text-[#C9A86A]"
+            style={{ fontFamily: "Poppins" }}
+          >
+            Lucknow
+          </span>
+
+          <h1
+            className="text-4xl leading-none text-[#0F4C3A]"
+            style={{ fontFamily: "Cormorant Garamond" }}
+          >
+            MF Chikankari
+          </h1>
+
+          <span
+            className="text-xs tracking-[0.25em] text-[#6A2435]"
+            style={{ fontFamily: "Poppins" }}
+          >
+            HANDICRAFT
+          </span>
+        </a>
+
+        {/* Navigation */}
+        <ul
+  className="hidden md:flex items-center gap-10"
+  style={{ fontFamily: "Poppins" }}
+>
+  {[
+    { name: "Home", active: true },
+    { name: "About", active: false },
+    { name: "Collections", active: false },
+    { name: "Gallery", active: false },
+    { name: "Contact", active: false },
+  ].map((item) => (
+    <li key={item.name}>
+      <a
+        href="#"
+        className={`relative pb-1 text-[15px] font-medium transition-all duration-300 ${
+          item.active
+            ? "text-[#0F4C3A]"
+            : "text-[#555] hover:text-[#0F4C3A]"
+        }`}
+      >
+        {item.name}
+
+        <span
+          className={`absolute left-0 -bottom-1 h-[2px] bg-[#C9A86A] transition-all duration-300 ${
+            item.active ? "w-full" : "w-0 group-hover:w-full"
+          }`}
+        />
+      </a>
+    </li>
+  ))}
+</ul>
+
+        {/* Buttons */}
+        <div className="hidden md:flex items-center gap-3">
+          <button
+            className="rounded-full border border-[#0F4C3A] px-5 py-2 text-sm font-medium text-[#0F4C3A] transition-all duration-300 hover:bg-[#0F4C3A] hover:text-white"
+            style={{ fontFamily: "Poppins" }}
+          >
+            Dealer Login
+          </button>
+
+          <button
+            className="rounded-full bg-[#0F4C3A] px-5 py-2 text-sm font-medium text-white transition-all duration-300 hover:scale-105"
+            style={{ fontFamily: "Poppins" }}
+          >
+            WhatsApp
+          </button>
+        </div>
+
       </div>
     </nav>
   );
