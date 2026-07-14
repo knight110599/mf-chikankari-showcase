@@ -1,7 +1,11 @@
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 function Navbar() {
+  const [open, setOpen] = useState(false);
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-[#E8DCC5] bg-[#F8F5F0]/90 backdrop-blur-md">
-      <div className="mx-auto flex h-28 w-full max-w-7xl items-center justify-between px-8 lg:px-12">
+      <div className="mx-auto flex h-24 md:h-28 w-full max-w-7xl items-center justify-between px-8 lg:px-12">
 
         {/* Logo */}
         <a
@@ -16,7 +20,7 @@ function Navbar() {
           </span>
 
           <h1
-            className="text-4xl leading-none text-[#0F4C3A]"
+            className="text-3xl md:text-4xl leading-none text-[#0F4C3A]"
             style={{ fontFamily: "Cormorant Garamond" }}
           >
             MF Chikankari
@@ -98,8 +102,53 @@ function Navbar() {
             WhatsApp
           </button>
         </div>
-
+<div className="hidden md:flex items-center gap-3"></div>
+{/* Mobile Menu Button */}
+<button
+  onClick={() => setOpen(!open)}
+  className="md:hidden text-[#0F4C3A]"
+>
+  {open ? <X size={28} /> : <Menu size={28} />}
+</button>
       </div>
+      {open && (
+  <div className="absolute left-0 top-28 w-full border-t border-[#E8DCC5] bg-[#F8F5F0] md:hidden">
+    <ul className="flex flex-col gap-6 px-8 py-8">
+      {[
+        {
+          name: "Home",
+          href: "#home",
+        },
+        {
+          name: "About",
+          href: "#about",
+        },
+        {
+          name: "Collections",
+          href: "#collections",
+        },
+        {
+          name: "Gallery",
+          href: "#gallery",
+        },
+        {
+          name: "Contact",
+          href: "#contact",
+        },
+      ].map((item) => (
+        <li key={item.name}>
+          <a
+            href={item.href}
+            onClick={() => setOpen(false)}
+            className="text-[#555] hover:text-[#0F4C3A]"
+          >
+            {item.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
     </nav>
   );
 }

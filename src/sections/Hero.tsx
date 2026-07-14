@@ -57,10 +57,10 @@ function Hero() {
         </div>
 
         <div
-          className="mt-10 grid grid-cols-2 gap-5"
-          style={{ fontFamily: "Poppins" }}
-        >
-          <div className="flex items-center gap-3">
+  className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2"
+  style={{ fontFamily: "Poppins" }}
+>
+          <div className="flex items-center gap-4 rounded-xl bg-white/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-lg">
             <span className="text-2xl"><Sparkles className="text-[#C9A86A]" /></span>
             <div>
               <h4 className="font-semibold text-[#0F4C3A]">500+ Designs</h4>
@@ -68,7 +68,7 @@ function Hero() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 rounded-xl bg-white/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-lg">
             <span className="text-2xl"><Truck className="text-[#0F4C3A]" /></span>
             <div>
               <h4 className="font-semibold text-[#0F4C3A]">Pan India</h4>
@@ -76,7 +76,7 @@ function Hero() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl p-3 transition hover:bg-white hover:shadow-lg">
+          <div className="flex items-center gap-4 rounded-xl bg-white/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-lg">
             <span className="text-2xl"><Scissors className="text-[#0F4C3A]" /></span>
             <div>
               <h4 className="font-semibold text-[#0F4C3A]">Handcrafted</h4>
@@ -84,7 +84,7 @@ function Hero() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 rounded-xl bg-white/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-lg">
             <span className="text-2xl"><Store className="text-[#0F4C3A]" /></span>
             <div>
               <h4 className="font-semibold text-[#0F4C3A]">Trusted Since 1998</h4>
