@@ -32,20 +32,39 @@ function Navbar() {
 
         {/* Navigation */}
         <ul
-  className="hidden md:flex items-center gap-10"
+  className="hidden items-center gap-10 md:flex"
   style={{ fontFamily: "Poppins" }}
 >
   {[
-    { name: "Home", active: true },
-    { name: "About", active: false },
-    { name: "Collections", active: false },
-    { name: "Gallery", active: false },
-    { name: "Contact", active: false },
-  ].map((item) => (
+    {
+    name: "Home",
+    href: "#home",
+    active: true,
+  },
+  {
+    name: "About",
+    href: "#about",
+    active: false,
+  },
+  {
+    name: "Collections",
+    href: "#collections",
+    active: false,
+  },
+  {
+    name: "Gallery",
+    href: "#gallery",
+    active: false,
+  },
+  {
+    name: "Contact",
+    href: "#contact",
+    active: false,
+  }].map((item) => (
     <li key={item.name}>
       <a
-        href="#"
-        className={`relative pb-1 text-[15px] font-medium transition-all duration-300 ${
+        href={item.href}
+        className={`group relative pb-1 text-[15px] font-medium transition-all duration-300 ${
           item.active
             ? "text-[#0F4C3A]"
             : "text-[#555] hover:text-[#0F4C3A]"
