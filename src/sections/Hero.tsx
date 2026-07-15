@@ -16,7 +16,7 @@ function Hero() {
         initial={{ opacity: 0, x: -60 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        className="flex-1 max-w-xl"
+        className="flex-1 max-w-2xl"
       >
         <p
           className="mb-4 text-sm uppercase tracking-[0.4em] text-[#C9A86A]"
@@ -31,9 +31,9 @@ function Hero() {
         >
           Authentic
           <br />
-          Chikankari
+          Lucknowi
           <br />
-          Handicraft
+          Chikankari
         </h1>
 
         <p
@@ -44,7 +44,20 @@ function Hero() {
           Handcrafted Collections for wholesalers,
           boutiques and resellers across India.
         </p>
-
+<motion.div
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.8 }}
+  className="mt-8 flex justify-center lg:hidden"
+>
+  <div className="w-full max-w-[340px] overflow-hidden rounded-[30px] border border-[#D9C8A8] bg-[#EFE8DB] p-4 shadow-xl">
+    <img
+      src={heroKurti}
+      alt="MF Chikankari Kurti"
+      className="h-auto w-full object-contain"
+    />
+  </div>
+</motion.div>
         <div className="mt-10 flex gap-4">
   <a
     href="#collections"
@@ -63,7 +76,7 @@ function Hero() {
 </div>
 
         <div
-          className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2"
+          className="mt-10 flex flex-col gap-4 sm:flex-row"
           style={{ fontFamily: "Poppins" }}
         >
           <div className="flex items-center gap-4 rounded-xl border border-[#E8DCC5] bg-white/50 p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-lg">
@@ -100,18 +113,20 @@ function Hero() {
         </div>
       </motion.div>
       {/* Right Side */}
-      <motion.div
+      {/* Right Side - Desktop */}
+<motion.div
   initial={{ opacity: 0, scale: 0.9 }}
   animate={{ opacity: 1, scale: 1 }}
   transition={{ duration: 1 }}
-  className="flex flex-1 justify-center lg:justify-end"
-><div className="h-[520px] w-[420px] overflow-hidden rounded-[40px] border border-[#D9C8A8] bg-[#EFE8DB] p-6 shadow-2xl">
-        <img
-  src={heroKurti}
-  alt="MF Chikankari Kurti"
-  className="h-full w-full object-contain"
-/>
-      </div>
+  className="hidden flex-1 justify-center lg:flex lg:justify-end"
+>
+  <div className="h-[520px] w-[420px] overflow-hidden rounded-[40px] border border-[#D9C8A8] bg-[#EFE8DB] p-6 shadow-2xl">
+    <img
+      src={heroKurti}
+      alt="MF Chikankari Kurti"
+      className="h-full w-full object-contain"
+    />
+  </div>
 </motion.div>
     </section>
   );
