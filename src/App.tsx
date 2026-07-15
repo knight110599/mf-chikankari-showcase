@@ -7,6 +7,8 @@ import BrandStory from "./sections/BrandStory";
 import WholesaleProcess from "./sections/WholesaleProcess";
 import Gallery from "./sections/Gallery";
 import Footer from "./sections/Footer";
+import WhatsAppFloatingButton from "./components/WhatsAppFloatingButton";
+
 function App() {
   return (
     <main className="bg-[#F8F5F0] min-h-screen">
@@ -38,6 +40,8 @@ function App() {
 
       <section id="contact">
         <Footer />
+        <WhatsAppFloatingButton />
+
       </section>
     </main>
   );

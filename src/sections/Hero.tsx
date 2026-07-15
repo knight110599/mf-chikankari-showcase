@@ -46,15 +46,21 @@ function Hero() {
         </p>
 
         <div className="mt-10 flex gap-4">
-          <button className="flex items-center gap-2 rounded-full bg-[#0F4C3A] px-8 py-4 text-white transition hover:scale-105 hover:bg-[#0a3d2f]">
-            Explore Collection
-            <ArrowRight size={18} />
-          </button>
+  <a
+    href="#collections"
+    className="flex items-center gap-2 rounded-full bg-[#0F4C3A] px-8 py-4 text-white transition hover:scale-105 hover:bg-[#0a3d2f]"
+  >
+    Explore Collection
+    <ArrowRight size={18} />
+  </a>
 
-          <button className="rounded-full border border-[#0F4C3A] px-8 py-4 text-[#0F4C3A]">
-            Contact Us
-          </button>
-        </div>
+  <a
+    href="#contact"
+    className="rounded-full border border-[#0F4C3A] px-8 py-4 text-[#0F4C3A] transition hover:bg-[#0F4C3A] hover:text-white"
+  >
+    Contact Us
+  </a>
+</div>
 
         <div
           className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2"
