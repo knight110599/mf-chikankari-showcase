@@ -55,10 +55,10 @@ function WholesaleProcess() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
           viewport={{ once: true, amount: 0.2 }}
-          className="mt-12 grid gap-0 md:mt-14 md:grid-cols-2 md:gap-6 xl:grid-cols-5"
+          className="mt-12 grid items-stretch gap-0 md:mt-14 md:grid-cols-2 md:gap-6 xl:grid-cols-5"
         >
           {processSteps.map((item, index) => (
-            <div key={item.step} className="relative">
+            <div key={item.step} className="relative h-full">
               <ProcessCard
                 step={item.step}
                 icon={item.icon}
@@ -68,11 +68,13 @@ function WholesaleProcess() {
 
               {index < processSteps.length - 1 && (
                 <>
+                  {/* Mobile connector */}
                   <div
                     aria-hidden="true"
                     className="mx-auto h-10 w-px bg-[#D9C6A6] md:hidden"
                   />
 
+                  {/* Desktop connector */}
                   <div
                     aria-hidden="true"
                     className="absolute -right-6 top-1/2 hidden h-px w-6 -translate-y-1/2 bg-[#D9C6A6] xl:block"
