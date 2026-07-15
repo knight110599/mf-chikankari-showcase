@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
-import brandStory from "../assets/Images/brand-story.jpg";
+import brandStory from "../assets/images/brand-story.jpg";
 
 function BrandStory() {
   return (

@@ -1,4 +1,4 @@
-import heroKurti from "../assets/Images/Products/hero-kurti.png";
+import heroKurti from "../assets/images/products/hero-kurti.png";
 import { motion } from "framer-motion";
 import {
   ArrowRight,

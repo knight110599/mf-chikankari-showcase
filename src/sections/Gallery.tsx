@@ -2,13 +2,13 @@ import { motion } from "framer-motion";
 import SectionTitle from "../components/ui/SectionTitle";
 import GalleryCard from "../components/ui/GalleryCard";
 
-import blueSuit from "../assets/Images/Gallery/blue-suit.png";
-import brownSuit from "../assets/Images/Gallery/brown-suit.jpg";
-import darkRedSuit from "../assets/Images/Gallery/dark-red-suit.jpg";
-import greenSuit from "../assets/Images/Gallery/green-suit.jpg";
-import lightGreenSuit from "../assets/Images/Gallery/light-green-suit.jpg";
-import purpleSuit from "../assets/Images/Gallery/purple-suit.jpg";
-import whiteSuit from "../assets/Images/Gallery/white-suit.jpg";
+import blueSuit from "../assets/images/Gallery/blue-suit.png";
+import brownSuit from "../assets/images/Gallery/brown-suit.jpg";
+import darkRedSuit from "../assets/images/Gallery/dark-red-suit.jpg";
+import greenSuit from "../assets/images/Gallery/green-suit.jpg";
+import lightGreenSuit from "../assets/images/Gallery/light-green-suit.jpg";
+import purpleSuit from "../assets/images/Gallery/purple-suit.jpg";
+import whiteSuit from "../assets/images/Gallery/white-suit.jpg";
 
 const gallery = [
   {
