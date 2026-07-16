@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/product/ProductCard";
 import { products } from "../data/products";
 
@@ -7,6 +7,7 @@ function ProductsPage() {
   const [category, setCategory] = useState("All");
   const [fabric, setFabric] = useState("All");
   const [sortBy, setSortBy] = useState("default");
+  const [visibleCount, setVisibleCount] = useState(6);
 
   const categories = [
     "All",
@@ -53,11 +54,15 @@ function ProductsPage() {
   }, [search, category, fabric, sortBy]);
 
   function clearFilters() {
-    setSearch("");
-    setCategory("All");
-    setFabric("All");
-    setSortBy("default");
-  }
+  setSearch("");
+  setCategory("All");
+  setFabric("All");
+  setSortBy("default");
+  setVisibleCount(6);
+}
+useEffect(() => {
+  setVisibleCount(6);
+}, [search, category, fabric, sortBy]);
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
@@ -206,11 +211,25 @@ function ProductsPage() {
       </div>
 
       {filteredProducts.length > 0 ? (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredProducts.slice(0, visibleCount).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+          {visibleCount < filteredProducts.length && (
+            <div className="mt-12 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((current) => current + 6)}
+                className="inline-flex min-h-14 items-center justify-center rounded-full bg-[#0F4C3A] px-8 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#0A3D2F] hover:shadow-lg"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Load More
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="mt-10 rounded-[28px] border border-[#E8DCC5] bg-white p-8 text-center sm:p-12">
           <h2
