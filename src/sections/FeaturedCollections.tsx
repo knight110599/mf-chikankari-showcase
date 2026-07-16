@@ -15,15 +15,34 @@ function FeaturedCollections() {
       />
 
       <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {featuredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        {featuredProducts.length > 0 ? (
+          featuredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))
+        ) : (
+          <div className="col-span-full rounded-[28px] border border-[#E8DCC5] bg-white p-10 text-center">
+            <h3
+              className="text-3xl text-[#0F4C3A]"
+              style={{ fontFamily: "Cormorant Garamond" }}
+            >
+              No Featured Products
+            </h3>
+
+            <p
+              className="mt-3 text-gray-600"
+              style={{ fontFamily: "Poppins" }}
+            >
+              Featured products will appear here once they are added.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="mt-12 flex justify-center">
         <Link
           to="/products"
-          className="rounded-full bg-[#0F4C3A] px-8 py-4 font-semibold text-white transition hover:-translate-y-1 hover:bg-[#0A3D2F]"
+          className="inline-flex min-h-14 items-center justify-center rounded-full bg-[#0F4C3A] px-8 font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#0A3D2F] hover:shadow-lg"
+          style={{ fontFamily: "Poppins" }}
         >
           View All Products
         </Link>
