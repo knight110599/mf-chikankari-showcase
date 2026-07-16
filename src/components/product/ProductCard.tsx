@@ -30,9 +30,7 @@ function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h2>
 
-          <p className="mt-2 text-sm text-gray-500">
-            {product.fabric}
-          </p>
+          <p className="mt-2 text-sm text-gray-500">{product.fabric}</p>
 
           <div className="mt-5 flex items-center justify-between">
             <span className="font-semibold text-[#0F4C3A]">

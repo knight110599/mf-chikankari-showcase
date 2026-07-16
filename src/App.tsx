@@ -5,6 +5,7 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import ProductsPage from "./pages/ProductsPage";
 import CategoriesPage from "./pages/CategoriesPage";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
 import CategoryProductsPage from "./pages/CategoryProductsPage";
 
 function App() {
@@ -15,7 +16,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/:slug" element={<ProductsPage />} />
+        <Route path="/products/:slug" element={<ProductDetailsPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/categories/:slug" element={<CategoryProductsPage />} />
       </Route>
