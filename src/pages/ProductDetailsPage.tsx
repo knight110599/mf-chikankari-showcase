@@ -18,7 +18,6 @@ function ProductDetailsPage() {
   const { slug } = useParams();
 
   const product = products.find((item) => item.slug === slug);
-
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -59,16 +58,18 @@ function ProductDetailsPage() {
   }
 
   const currentImage = product.images[selectedImage] ?? product.image;
+  const productImageCount = product.images.length;
+  const productStock = product.stock;
 
   function handlePreviousImage() {
     setSelectedImage((current) =>
-      current === 0 ? product.images.length - 1 : current - 1,
+      current === 0 ? productImageCount - 1 : current - 1,
     );
   }
 
   function handleNextImage() {
     setSelectedImage((current) =>
-      current === product.images.length - 1 ? 0 : current + 1,
+      current === productImageCount - 1 ? 0 : current + 1,
     );
   }
 
@@ -77,7 +78,7 @@ function ProductDetailsPage() {
   }
 
   function increaseQuantity() {
-    setQuantity((current) => Math.min(product.stock, current + 1));
+    setQuantity((current) => Math.min(productStock, current + 1));
   }
 
   const whatsappMessage = encodeURIComponent(
