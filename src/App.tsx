@@ -1,49 +1,25 @@
-import Hero from "./sections/Hero";
-import Collections from "./sections/Collections";
-import WhyChoose from "./sections/WhyChoose";
-import Navbar from "./components/Navbar";
-import FeaturedCollections from "./sections/FeaturedCollections";
-import BrandStory from "./sections/BrandStory";
-import WholesaleProcess from "./sections/WholesaleProcess";
-import Gallery from "./sections/Gallery";
-import Footer from "./sections/Footer";
-import WhatsAppFloatingButton from "./components/WhatsAppFloatingButton";
+import { Route, Routes } from "react-router-dom";
+import MainLayout from "./layouts/MainLayout";
+import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import ProductsPage from "./pages/ProductsPage";
+import CategoriesPage from "./pages/CategoriesPage";
+import CategoryProductsPage from "./pages/CategoryProductsPage";
 
 function App() {
   return (
-    <main className="bg-[#F8F5F0] min-h-screen">
-      <Navbar />
-
-      <section id="home">
-        <Hero />
-      </section>
-
-      <section id="collections">
-        <Collections />
-      </section>
-
-      <section id="about">
-        <BrandStory />
-      </section>
-
-      <WhyChoose />
-
-      <FeaturedCollections />
-
-      <section id="wholesale">
-        <WholesaleProcess />
-      </section>
-
-      <section id="gallery">
-        <Gallery />
-      </section>
-
-      <section id="contact">
-        <Footer />
-        <WhatsAppFloatingButton />
-
-      </section>
-    </main>
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/:slug" element={<ProductsPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
+        <Route path="/categories/:slug" element={<CategoryProductsPage />} />
+      </Route>
+    </Routes>
   );
 }
 
