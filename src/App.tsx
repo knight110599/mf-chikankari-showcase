@@ -7,6 +7,9 @@ import ProductsPage from "./pages/ProductsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import CategoryProductsPage from "./pages/CategoryProductsPage";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 
 function App() {
   return (
@@ -19,7 +22,10 @@ function App() {
         <Route path="/products/:slug" element={<ProductDetailsPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/categories/:slug" element={<CategoryProductsPage />} />
-      </Route>
+      <Route path="/login" element={<LoginPage />} />
+<Route path="/signup" element={<SignupPage />} />
+<Route path="/forgot-password" element={<ForgotPasswordPage />} />
+</Route>
     </Routes>
   );
 }
