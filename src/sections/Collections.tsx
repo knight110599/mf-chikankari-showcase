@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import kurtis from "/src/assets/images/kurtis.jpg";
 import suits from "/src/assets/images/suits.jpg";
 import dupattas from "/src/assets/images/dupattas.jpg";
@@ -7,16 +8,19 @@ const collections = [
     title: "Women's Kurtis",
     desc: "Elegant everyday and festive Chikankari kurtis.",
     image: kurtis,
+    slug: "kurtis",
   },
   {
     title: "Chikankari Suits",
     desc: "Premium handcrafted suit sets for refined occasions.",
     image: suits,
+    slug: "suits",
   },
   {
     title: "Dupattas",
     desc: "Finely embroidered dupattas crafted with traditional detail.",
     image: dupattas,
+    slug: "dupattas",
   },
 ];
 
@@ -52,9 +56,10 @@ function Collections() {
 
       <div className="mt-10 grid items-stretch gap-6 sm:mt-12 md:grid-cols-2 lg:mt-14 lg:grid-cols-3 lg:gap-8">
         {collections.map((item) => (
-          <article
+          <Link
             key={item.title}
-            className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-[#E8DCC5] bg-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#D8C29A] hover:shadow-2xl"
+            to={`/categories/${item.slug}`}
+            className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-[#E8DCC5] bg-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#D8C29A] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#0F4C3A] focus:ring-offset-4"
           >
             <div className="relative h-72 overflow-hidden sm:h-80">
               <img
@@ -91,21 +96,21 @@ function Collections() {
                 {item.desc}
               </p>
 
-              <a
-                href="#contact"
+              <span
                 className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#0F4C3A] transition-colors duration-300 group-hover:text-[#C9A86A]"
                 style={{ fontFamily: "Poppins" }}
               >
                 View Collection
+
                 <span
                   aria-hidden="true"
                   className="transition-transform duration-300 group-hover:translate-x-1"
                 >
                   →
                 </span>
-              </a>
+              </span>
             </div>
-          </article>
+          </Link>
         ))}
       </div>
     </section>
