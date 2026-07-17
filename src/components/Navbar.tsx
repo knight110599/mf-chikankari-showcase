@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-
+import { LogOut, UserRound } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 const navItems = [
   {
     name: "Home",
@@ -27,6 +29,17 @@ const navItems = [
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout?.();
+    } catch (e) {
+      // ignore
+    }
+    navigate("/");
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-[#E8DCC5] bg-[#F8F5F0]/90 backdrop-blur-md">
@@ -94,14 +107,43 @@ function Navbar() {
         </ul>
 
         {/* Desktop Actions */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            to="/login"
-            className="rounded-full border border-[#0F4C3A] px-5 py-2 text-sm font-medium text-[#0F4C3A] transition-all duration-300 hover:bg-[#0F4C3A] hover:text-white"
-            style={{ fontFamily: "Poppins" }}
-          >
-            Dealer Login
-          </Link>
+        <div className="hidden items-center gap-3 lg:flex">
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/account"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-[#D9C8A8] px-5 text-sm font-semibold text-[#0F4C3A] transition hover:border-[#0F4C3A] hover:bg-[#0F4C3A]/5"
+              >
+                <UserRound className="h-4 w-4" />
+                {user?.name || "My Account"}
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex h-11 items-center gap-2 rounded-full bg-[#0F4C3A] px-5 text-sm font-semibold text-white transition hover:bg-[#0B3F30]"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="inline-flex h-11 items-center rounded-full border border-[#D9C8A8] px-5 text-sm font-semibold text-[#0F4C3A]"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/signup"
+                className="inline-flex h-11 items-center rounded-full bg-[#0F4C3A] px-5 text-sm font-semibold text-white"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
 
           <a
             href="https://wa.me/916386826199?text=Hello%20MF%20Chikankari%2C%20I%20would%20like%20to%20know%20more%20about%20your%20collections."

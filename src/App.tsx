@@ -10,6 +10,10 @@ import CategoryProductsPage from "./pages/CategoryProductsPage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import AccountPage from "./pages/account/AccountPage";
+
+const SignupComponent = SignupPage as any;
 
 function App() {
   return (
@@ -22,10 +26,13 @@ function App() {
         <Route path="/products/:slug" element={<ProductDetailsPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/categories/:slug" element={<CategoryProductsPage />} />
-      <Route path="/login" element={<LoginPage />} />
-<Route path="/signup" element={<SignupPage />} />
-<Route path="/forgot-password" element={<ForgotPasswordPage />} />
-</Route>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupComponent />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/account" element={<AccountPage />} />
+        </Route>
+      </Route>
     </Routes>
   );
 }

@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthInput from "../../components/auth/AuthInput";
 import AuthLayout from "../../components/auth/AuthLayout";
 import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
+import { useAuth } from "../../context/AuthContext";
 import {
   loginSchema,
   type LoginFormValues,
@@ -23,6 +24,7 @@ export default function LoginPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
   const {
     register,
@@ -38,25 +40,23 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
-    setServerError("");
+  setServerError("");
 
-    try {
-      // Temporary frontend simulation.
-      // This will be replaced with the real authentication API.
-      await new Promise((resolve) => setTimeout(resolve, 900));
+  try {
+    await login(values);
 
-      console.log("Login values:", values);
+    const state = location.state as LoginLocationState | null;
+    const destination = state?.from?.pathname || "/account";
 
-      const state = location.state as LoginLocationState | null;
-      const destination = state?.from?.pathname || "/account";
-
-      navigate(destination, { replace: true });
-    } catch {
-      setServerError(
-        "We could not sign you in. Please check your details and try again.",
-      );
-    }
-  };
+    navigate(destination, { replace: true });
+  } catch (error) {
+    setServerError(
+      error instanceof Error
+        ? error.message
+        : "We could not sign you in. Please try again.",
+    );
+  }
+};
 
   return (
     <AuthLayout
