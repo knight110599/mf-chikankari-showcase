@@ -1,36 +1,45 @@
 import { Route, Routes } from "react-router-dom";
-import MainLayout from "./layouts/MainLayout";
-import HomePage from "./pages/HomePage";
-import AboutPage from "./pages/AboutPage";
-import ContactPage from "./pages/ContactPage";
-import ProductsPage from "./pages/ProductsPage";
-import CategoriesPage from "./pages/CategoriesPage";
-import ProductDetailsPage from "./pages/ProductDetailsPage";
-import CategoryProductsPage from "./pages/CategoryProductsPage";
-import LoginPage from "./pages/auth/LoginPage";
-import SignupPage from "./pages/auth/SignupPage";
-import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import MainLayout from "./layouts/MainLayout";
+import AboutPage from "./pages/AboutPage";
 import AccountPage from "./pages/account/AccountPage";
-
-const SignupComponent = SignupPage as any;
+import CategoriesPage from "./pages/CategoriesPage";
+import CategoryProductsPage from "./pages/CategoryProductsPage";
+import ContactPage from "./pages/ContactPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/auth/LoginPage";
+import ProductDetailsPage from "./pages/ProductDetailsPage";
+import ProductsPage from "./pages/ProductsPage";
+import SignupPage from "./pages/auth/SignupPage";
 
 function App() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/:slug" element={<ProductDetailsPage />} />
-        <Route path="/categories" element={<CategoriesPage />} />
-        <Route path="/categories/:slug" element={<CategoryProductsPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupComponent />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route index element={<HomePage />} />
+
+        <Route path="about" element={<AboutPage />} />
+        <Route path="contact" element={<ContactPage />} />
+
+        <Route path="products" element={<ProductsPage />} />
+        <Route path="products/:slug" element={<ProductDetailsPage />} />
+
+        <Route path="categories" element={<CategoriesPage />} />
+        <Route
+          path="categories/:slug"
+          element={<CategoryProductsPage />}
+        />
+
+        <Route path="login" element={<LoginPage />} />
+        <Route path="signup" element={<SignupPage />} />
+        <Route
+          path="forgot-password"
+          element={<ForgotPasswordPage />}
+        />
+
         <Route element={<ProtectedRoute />}>
-          <Route path="/account" element={<AccountPage />} />
+          <Route path="account" element={<AccountPage />} />
         </Route>
       </Route>
     </Routes>

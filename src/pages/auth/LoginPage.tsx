@@ -15,6 +15,8 @@ import {
 interface LoginLocationState {
   from?: {
     pathname?: string;
+    search?: string;
+    hash?: string;
   };
 }
 
@@ -46,9 +48,16 @@ export default function LoginPage() {
     await login(values);
 
     const state = location.state as LoginLocationState | null;
-    const destination = state?.from?.pathname || "/account";
+    const from = state?.from;
 
-    navigate(destination, { replace: true });
+    const destination = from?.pathname
+      ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}`
+      : "/account";
+
+    navigate(destination, {
+      replace: true,
+      state: null,
+    });
   } catch (error) {
     setServerError(
       error instanceof Error

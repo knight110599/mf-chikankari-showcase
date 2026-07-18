@@ -30,6 +30,26 @@ const AUTH_STORAGE_KEY = "mf-chikankari-auth-user";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+function clearStoredAuth() {
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+  sessionStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+function isValidAuthUser(value: unknown): value is AuthUser {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const user = value as Partial<AuthUser>;
+
+  return (
+    typeof user.id === "string" &&
+    typeof user.name === "string" &&
+    typeof user.email === "string" &&
+    user.role === "customer"
+  );
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -37,16 +57,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     try {
       const storedUser =
-  localStorage.getItem(AUTH_STORAGE_KEY) ??
-  sessionStorage.getItem(AUTH_STORAGE_KEY);
+        localStorage.getItem(AUTH_STORAGE_KEY) ??
+        sessionStorage.getItem(AUTH_STORAGE_KEY);
 
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser) as AuthUser;
-        setUser(parsedUser);
+      if (!storedUser) {
+        return;
       }
+
+      const parsedUser: unknown = JSON.parse(storedUser);
+
+      if (!isValidAuthUser(parsedUser)) {
+        clearStoredAuth();
+        return;
+      }
+
+      setUser(parsedUser);
     } catch (error) {
       console.error("Failed to restore authentication session:", error);
-      localStorage.removeItem(AUTH_STORAGE_KEY);
+      clearStoredAuth();
     } finally {
       setIsInitializing(false);
     }
@@ -56,30 +84,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async (credentials: LoginCredentials): Promise<void> => {
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      if (!credentials.email || !credentials.password) {
+      const email = credentials.email.trim().toLowerCase();
+
+      if (!email || !credentials.password) {
         throw new Error("Email and password are required.");
       }
 
       const authenticatedUser: AuthUser = {
         id: crypto.randomUUID(),
         name: "MF Customer",
-        email: credentials.email,
+        email,
         role: "customer",
       };
 
+      clearStoredAuth();
       setUser(authenticatedUser);
 
-      if (credentials.rememberMe) {
-        localStorage.setItem(
-          AUTH_STORAGE_KEY,
-          JSON.stringify(authenticatedUser),
-        );
-      } else {
-        sessionStorage.setItem(
-          AUTH_STORAGE_KEY,
-          JSON.stringify(authenticatedUser),
-        );
-      }
+      const storage = credentials.rememberMe
+        ? localStorage
+        : sessionStorage;
+
+      storage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify(authenticatedUser),
+      );
     },
     [],
   );
@@ -88,24 +116,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async (credentials: SignupCredentials): Promise<void> => {
       await new Promise((resolve) => setTimeout(resolve, 900));
 
+      const fullName =
+        `${credentials.firstName.trim()} ${credentials.lastName.trim()}`.trim();
+
       const newUser: AuthUser = {
         id: crypto.randomUUID(),
-        name: `${credentials.firstName} ${credentials.lastName}`,
-        email: credentials.email,
+        name: fullName,
+        email: credentials.email.trim().toLowerCase(),
         role: "customer",
       };
 
+      clearStoredAuth();
       setUser(newUser);
 
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
+      localStorage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify(newUser),
+      );
     },
     [],
   );
 
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    clearStoredAuth();
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -121,7 +155,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 
   return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
   );
 }
 
