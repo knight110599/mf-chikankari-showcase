@@ -1,8 +1,36 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { prisma } from "../lib/prisma.js";
-import { generateAccessToken, generateRefreshToken } from "../utils/jwt.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../utils/jwt.js";
+export async function getCurrentUser(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      role: true,
+      status: true,
+      emailVerified: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
 
+  if (!user) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  return user;
+}
 interface RegisterInput {
   firstName: string;
   lastName: string;
@@ -146,4 +174,123 @@ export async function loginUser(input: LoginInput) {
     accessToken,
     refreshToken,
   };
+}
+export async function refreshUserSession(refreshToken: string) {
+  let payload;
+
+  try {
+    payload = verifyRefreshToken(refreshToken);
+  } catch {
+    throw new Error("INVALID_REFRESH_TOKEN");
+  }
+
+  const refreshTokenHash = crypto
+    .createHash("sha256")
+    .update(refreshToken)
+    .digest("hex");
+
+  const storedToken = await prisma.refreshToken.findUnique({
+    where: {
+      tokenHash: refreshTokenHash,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          role: true,
+          status: true,
+        },
+      },
+    },
+  });
+
+  if (!storedToken) {
+    throw new Error("INVALID_REFRESH_TOKEN");
+  }
+
+  if (storedToken.revokedAt) {
+    throw new Error("REFRESH_TOKEN_REVOKED");
+  }
+
+  if (storedToken.expiresAt <= new Date()) {
+    throw new Error("REFRESH_TOKEN_EXPIRED");
+  }
+
+  if (storedToken.userId !== payload.userId) {
+    throw new Error("INVALID_REFRESH_TOKEN");
+  }
+
+  if (storedToken.user.status !== "ACTIVE") {
+    throw new Error("ACCOUNT_NOT_ACTIVE");
+  }
+
+  const tokenPayload = {
+    userId: storedToken.user.id,
+    role: storedToken.user.role,
+  };
+
+  const newAccessToken = generateAccessToken(tokenPayload);
+  const newRefreshToken = generateRefreshToken(tokenPayload);
+
+  const newRefreshTokenHash = crypto
+    .createHash("sha256")
+    .update(newRefreshToken)
+    .digest("hex");
+
+  const newRefreshTokenExpiresAt = new Date();
+  newRefreshTokenExpiresAt.setDate(
+    newRefreshTokenExpiresAt.getDate() + 7,
+  );
+
+  await prisma.$transaction([
+    prisma.refreshToken.update({
+      where: {
+        id: storedToken.id,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    }),
+
+    prisma.refreshToken.create({
+      data: {
+        tokenHash: newRefreshTokenHash,
+        userId: storedToken.userId,
+        expiresAt: newRefreshTokenExpiresAt,
+      },
+    }),
+  ]);
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
+}
+export async function logoutUser(refreshToken: string) {
+  const refreshTokenHash = crypto
+    .createHash("sha256")
+    .update(refreshToken)
+    .digest("hex");
+
+  await prisma.refreshToken.updateMany({
+    where: {
+      tokenHash: refreshTokenHash,
+      revokedAt: null,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
+}
+
+export async function logoutAllSessions(userId: string) {
+  await prisma.refreshToken.updateMany({
+    where: {
+      userId,
+      revokedAt: null,
+    },
+    data: {
+      revokedAt: new Date(),
+    },
+  });
 }
