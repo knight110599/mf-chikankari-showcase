@@ -12,6 +12,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import ProductsPage from "./pages/ProductsPage";
 import SignupPage from "./pages/auth/SignupPage";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
           path="forgot-password"
           element={<ForgotPasswordPage />}
         />
+
+        <Route path="admin/login" element={<AdminLoginPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="account" element={<AccountPage />} />
