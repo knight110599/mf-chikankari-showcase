@@ -30,3 +30,9 @@ server/dist
 
 # Generated Prisma client
 server/generated
+
+# Frontend environment
+.env
+.env.*
+src/.env
+src/.env.*

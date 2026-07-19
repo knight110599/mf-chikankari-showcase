@@ -1,34 +1,101 @@
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/product/ProductCard";
-import { products } from "../data/products";
+import {
+  getProducts,
+  type ApiProduct,
+} from "../services/product.service";
 
 function ProductsPage() {
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [fabric, setFabric] = useState("All");
   const [sortBy, setSortBy] = useState("default");
   const [visibleCount, setVisibleCount] = useState(6);
 
-  const categories = [
-    "All",
-    ...Array.from(new Set(products.map((product) => product.category))),
-  ];
+  useEffect(() => {
+    let isMounted = true;
 
-  const fabrics = [
-    "All",
-    ...Array.from(new Set(products.map((product) => product.fabric))),
-  ];
+    async function loadProducts() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await getProducts();
+
+        if (isMounted) {
+          setProducts(response.data);
+        }
+      } catch (caughtError) {
+        if (isMounted) {
+          setError(
+            caughtError instanceof Error
+              ? caughtError.message
+              : "Products could not be loaded.",
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setVisibleCount(6);
+  }, [search, category, fabric, sortBy]);
+
+  const categories = useMemo(
+    () => [
+      "All",
+      ...Array.from(
+        new Set(
+          products
+            .map((product) => product.category?.name)
+            .filter((item): item is string => Boolean(item)),
+        ),
+      ),
+    ],
+    [products],
+  );
+
+  const fabrics = useMemo(
+    () => [
+      "All",
+      ...Array.from(
+        new Set(
+          products
+            .map((product) => product.fabric)
+            .filter((item): item is string => Boolean(item)),
+        ),
+      ),
+    ],
+    [products],
+  );
 
   const filteredProducts = useMemo(() => {
+    const normalizedSearch = search.toLowerCase().trim();
+
     const result = products.filter((product) => {
       const matchesSearch = product.name
         .toLowerCase()
-        .includes(search.toLowerCase().trim());
+        .includes(normalizedSearch);
 
       const matchesCategory =
-        category === "All" || product.category === category;
+        category === "All" || product.category?.name === category;
 
-      const matchesFabric = fabric === "All" || product.fabric === fabric;
+      const matchesFabric =
+        fabric === "All" || product.fabric === fabric;
 
       return matchesSearch && matchesCategory && matchesFabric;
     });
@@ -36,10 +103,10 @@ function ProductsPage() {
     return [...result].sort((a, b) => {
       switch (sortBy) {
         case "price-low":
-          return a.price - b.price;
+          return Number(a.price) - Number(b.price);
 
         case "price-high":
-          return b.price - a.price;
+          return Number(b.price) - Number(a.price);
 
         case "name-asc":
           return a.name.localeCompare(b.name);
@@ -51,18 +118,15 @@ function ProductsPage() {
           return 0;
       }
     });
-  }, [search, category, fabric, sortBy]);
+  }, [products, search, category, fabric, sortBy]);
 
   function clearFilters() {
-  setSearch("");
-  setCategory("All");
-  setFabric("All");
-  setSortBy("default");
-  setVisibleCount(6);
-}
-useEffect(() => {
-  setVisibleCount(6);
-}, [search, category, fabric, sortBy]);
+    setSearch("");
+    setCategory("All");
+    setFabric("All");
+    setSortBy("default");
+    setVisibleCount(6);
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
@@ -127,6 +191,7 @@ useEffect(() => {
               onChange={(event) => setCategory(event.target.value)}
               className="h-12 w-full rounded-full border border-[#D9C8A8] bg-[#F8F5F0] px-4 text-sm text-gray-700 outline-none transition focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/10"
               style={{ fontFamily: "Poppins" }}
+              disabled={loading}
             >
               {categories.map((item) => (
                 <option key={item} value={item}>
@@ -151,6 +216,7 @@ useEffect(() => {
               onChange={(event) => setFabric(event.target.value)}
               className="h-12 w-full rounded-full border border-[#D9C8A8] bg-[#F8F5F0] px-4 text-sm text-gray-700 outline-none transition focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/10"
               style={{ fontFamily: "Poppins" }}
+              disabled={loading}
             >
               {fabrics.map((item) => (
                 <option key={item} value={item}>
@@ -177,6 +243,7 @@ useEffect(() => {
               onChange={(event) => setSortBy(event.target.value)}
               className="h-12 min-w-[220px] rounded-full border border-[#D9C8A8] bg-[#F8F5F0] px-4 text-sm text-gray-700 outline-none transition focus:border-[#0F4C3A] focus:ring-2 focus:ring-[#0F4C3A]/10"
               style={{ fontFamily: "Poppins" }}
+              disabled={loading}
             >
               <option value="default">Default</option>
               <option value="price-low">Price: Low to High</option>
@@ -189,72 +256,114 @@ useEffect(() => {
           <button
             type="button"
             onClick={clearFilters}
-            className="inline-flex h-12 items-center justify-center rounded-full border border-[#0F4C3A] px-6 text-sm font-semibold text-[#0F4C3A] transition hover:bg-[#0F4C3A] hover:text-white"
+            className="inline-flex h-12 items-center justify-center rounded-full border border-[#0F4C3A] px-6 text-sm font-semibold text-[#0F4C3A] transition hover:bg-[#0F4C3A] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
             style={{ fontFamily: "Poppins" }}
+            disabled={loading}
           >
             Clear Filters
           </button>
         </div>
       </div>
 
-      <div className="mt-8 flex items-center justify-between gap-4">
-        <p
-          className="text-sm text-gray-600"
-          style={{ fontFamily: "Poppins" }}
-        >
-          Showing{" "}
-          <span className="font-semibold text-[#0F4C3A]">
-            {filteredProducts.length}
-          </span>{" "}
-          {filteredProducts.length === 1 ? "product" : "products"}
-        </p>
-      </div>
+      {loading && (
+        <div className="mt-10 rounded-[28px] border border-[#E8DCC5] bg-white p-10 text-center">
+          <p
+            className="text-gray-600"
+            style={{ fontFamily: "Poppins" }}
+          >
+            Loading products...
+          </p>
+        </div>
+      )}
 
-      {filteredProducts.length > 0 ? (
-        <>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredProducts.slice(0, visibleCount).map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          {visibleCount < filteredProducts.length && (
-            <div className="mt-12 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setVisibleCount((current) => current + 6)}
-                className="inline-flex min-h-14 items-center justify-center rounded-full bg-[#0F4C3A] px-8 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#0A3D2F] hover:shadow-lg"
-                style={{ fontFamily: "Poppins" }}
-              >
-                Load More
-              </button>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="mt-10 rounded-[28px] border border-[#E8DCC5] bg-white p-8 text-center sm:p-12">
+      {!loading && error && (
+        <div className="mt-10 rounded-[28px] border border-red-200 bg-white p-8 text-center sm:p-12">
           <h2
             className="text-3xl text-[#0F4C3A]"
             style={{ fontFamily: "Cormorant Garamond" }}
           >
-            No products found
+            Unable to load products
           </h2>
 
           <p
             className="mx-auto mt-3 max-w-md leading-7 text-gray-600"
             style={{ fontFamily: "Poppins" }}
           >
-            Try changing your search term or removing some filters.
+            {error}
           </p>
-
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="mt-6 inline-flex rounded-full bg-[#0F4C3A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0A3D2F]"
-            style={{ fontFamily: "Poppins" }}
-          >
-            Reset Filters
-          </button>
         </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          <div className="mt-8 flex items-center justify-between gap-4">
+            <p
+              className="text-sm text-gray-600"
+              style={{ fontFamily: "Poppins" }}
+            >
+              Showing{" "}
+              <span className="font-semibold text-[#0F4C3A]">
+                {filteredProducts.length}
+              </span>{" "}
+              {filteredProducts.length === 1 ? "product" : "products"}
+            </p>
+          </div>
+
+          {filteredProducts.length > 0 ? (
+            <>
+              <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredProducts
+                  .slice(0, visibleCount)
+                  .map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                    />
+                  ))}
+              </div>
+
+              {visibleCount < filteredProducts.length && (
+                <div className="mt-12 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleCount((current) => current + 6)
+                    }
+                    className="inline-flex min-h-14 items-center justify-center rounded-full bg-[#0F4C3A] px-8 font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#0A3D2F] hover:shadow-lg"
+                    style={{ fontFamily: "Poppins" }}
+                  >
+                    Load More
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="mt-10 rounded-[28px] border border-[#E8DCC5] bg-white p-8 text-center sm:p-12">
+              <h2
+                className="text-3xl text-[#0F4C3A]"
+                style={{ fontFamily: "Cormorant Garamond" }}
+              >
+                No products found
+              </h2>
+
+              <p
+                className="mx-auto mt-3 max-w-md leading-7 text-gray-600"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Try changing your search term or removing some filters.
+              </p>
+
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-6 inline-flex rounded-full bg-[#0F4C3A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0A3D2F]"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Reset Filters
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
