@@ -1,24 +1,33 @@
 import { Route, Routes } from "react-router-dom";
+
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+
+import AdminLayout from "./layouts/AdminLayout";
 import MainLayout from "./layouts/MainLayout";
+
 import AboutPage from "./pages/AboutPage";
-import AccountPage from "./pages/account/AccountPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import CategoryProductsPage from "./pages/CategoryProductsPage";
 import ContactPage from "./pages/ContactPage";
-import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/auth/LoginPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import ProductsPage from "./pages/ProductsPage";
-import SignupPage from "./pages/auth/SignupPage";
-import AdminLoginPage from "./pages/admin/AdminLoginPage";
-import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 
+import AccountPage from "./pages/account/AccountPage";
+
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminAddProductPage from "./pages/admin/AdminAddProductPage";
+import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
 function App() {
   return (
     <Routes>
+      {/* Customer website */}
       <Route element={<MainLayout />}>
         <Route index element={<HomePage />} />
 
@@ -41,22 +50,33 @@ function App() {
           element={<ForgotPasswordPage />}
         />
 
-        <Route path="admin/login" element={<AdminLoginPage />} />
-
-<Route element={<AdminProtectedRoute />}>
-  <Route
-    path="admin/dashboard"
-    element={<AdminDashboardPage />}
-  />
-</Route>
-
-<Route element={<ProtectedRoute />}>
-  <Route path="account" element={<AccountPage />} />
-</Route>
-
         <Route element={<ProtectedRoute />}>
           <Route path="account" element={<AccountPage />} />
         </Route>
+      </Route>
+
+      {/* Public admin login */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+
+      {/* Protected admin area */}
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route
+            path="dashboard"
+            element={<AdminDashboardPage />}
+          />
+
+          <Route path="products" element={<AdminProductsPage />} />
+
+  <Route
+    path="products/new"
+    element={<AdminAddProductPage />}
+  />
+</Route>
+<Route
+  path="/admin/products/:id/edit"
+  element={<AdminEditProductPage />}
+/>
       </Route>
     </Routes>
   );

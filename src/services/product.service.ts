@@ -8,49 +8,82 @@ export interface ApiProductImage {
   isPrimary: boolean;
 }
 
+export interface ApiProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface ApiProduct {
   id: string;
   name: string;
   slug: string;
   sku: string;
   shortDescription: string | null;
-  description: string | null;
+  description: string;
   price: string;
   wholesalePrice: string | null;
   stock: number;
   minimumWholesaleQuantity: number | null;
   fabric: string | null;
   sizes: string[];
-  status: "DRAFT" | "ACTIVE" | "ARCHIVED";
+  status: string;
   isFeatured: boolean;
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-  };
+  isActive?: boolean;
+  categoryId: string;
+  category: ApiProductCategory;
   images: ApiProductImage[];
 }
 
-interface ProductsResponse {
+export interface ProductsPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ProductsResponse {
   success: boolean;
   message: string;
   data: ApiProduct[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+  pagination: ProductsPagination;
 }
 
-interface ProductResponse {
+export interface ProductResponse {
   success: boolean;
   message: string;
   data: ApiProduct;
 }
 
-export function getProducts() {
-  return apiRequest<ProductsResponse>("/products?page=1&limit=50");
+export interface GetProductsOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  category?: string;
+  categoryId?: string;
+  categorySlug?: string;
+  status?: string;
+  featured?: boolean;
+  isFeatured?: boolean;
+  sort?: string;
+  order?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+export function getProducts(options: GetProductsOptions = {}) {
+  const searchParams = new URLSearchParams();
+
+  Object.entries(options).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      searchParams.set(key, String(value));
+    }
+  });
+
+  const queryString = searchParams.toString();
+
+  return apiRequest<ProductsResponse>(
+    queryString ? `/products?${queryString}` : "/products",
+  );
 }
 
 export function getFeaturedProducts() {
@@ -58,5 +91,11 @@ export function getFeaturedProducts() {
 }
 
 export function getProductBySlug(slug: string) {
-  return apiRequest<ProductResponse>(`/products/slug/${slug}`);
+  return apiRequest<ProductResponse>(
+    `/products/slug/${encodeURIComponent(slug)}`,
+  );
+}
+
+export function getProductById(id: string) {
+  return apiRequest<ProductResponse>(`/products/${encodeURIComponent(id)}`);
 }
