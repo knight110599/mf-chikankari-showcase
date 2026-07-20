@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Boxes,
   Eye,
@@ -30,13 +31,18 @@ type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
 type LoginResponse = {
   success: boolean;
   message?: string;
-  accessToken?: string;
-  token?: string;
-  user?: {
-    id: string;
-    name?: string;
-    email: string;
-    role: string;
+  data?: {
+    user?: {
+      id: string;
+      firstName?: string;
+      lastName?: string;
+      email: string;
+      phone?: string | null;
+      role: string;
+      status?: string;
+      emailVerified?: boolean;
+    };
+    accessToken?: string;
   };
 };
 
@@ -44,6 +50,8 @@ const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export default function AdminLoginPage() {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -76,23 +84,31 @@ export default function AdminLoginPage() {
 
       const result = (await response.json()) as LoginResponse;
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Unable to login");
-      }
+if (!response.ok || !result.success) {
+  throw new Error(result.message || "Unable to login");
+}
 
-      if (result.user?.role !== "ADMIN") {
-        throw new Error("You are not authorized to access the admin panel.");
-      }
+const user = result.data?.user;
+const token = result.data?.accessToken;
 
-      const token = result.accessToken || result.token;
+if (!user) {
+  throw new Error("User information was not returned by the server.");
+}
 
-      if (token) {
-        localStorage.setItem("adminAccessToken", token);
-      }
+if (user.role?.toUpperCase() !== "ADMIN") {
+  throw new Error("You are not authorized to access the admin panel.");
+}
 
-      localStorage.setItem("adminUser", JSON.stringify(result.user));
+if (!token) {
+  throw new Error("Access token was not returned by the server.");
+}
 
-      setSuccessMessage("Admin login successful.");
+localStorage.setItem("adminAccessToken", token);
+localStorage.setItem("adminUser", JSON.stringify(user));
+
+navigate("/admin/dashboard", {
+  replace: true,
+});
     } catch (error) {
       setServerError(
         error instanceof Error

@@ -13,6 +13,8 @@ import ProductDetailsPage from "./pages/ProductDetailsPage";
 import ProductsPage from "./pages/ProductsPage";
 import SignupPage from "./pages/auth/SignupPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 
 function App() {
   return (
@@ -40,6 +42,17 @@ function App() {
         />
 
         <Route path="admin/login" element={<AdminLoginPage />} />
+
+<Route element={<AdminProtectedRoute />}>
+  <Route
+    path="admin/dashboard"
+    element={<AdminDashboardPage />}
+  />
+</Route>
+
+<Route element={<ProtectedRoute />}>
+  <Route path="account" element={<AccountPage />} />
+</Route>
 
         <Route element={<ProtectedRoute />}>
           <Route path="account" element={<AccountPage />} />
