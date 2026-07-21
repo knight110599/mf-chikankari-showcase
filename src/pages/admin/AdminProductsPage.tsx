@@ -14,11 +14,19 @@ type Category = {
   name?: string;
 };
 
+type ProductImage = {
+  id: string;
+  url: string;
+  altText?: string | null;
+  isPrimary?: boolean;
+};
+
 type Product = {
   id: string;
   name: string;
   slug?: string;
   image?: string;
+  images?: ProductImage[];
   price?: number | string;
   wholesalePrice?: number | string;
   stock?: number;
@@ -62,7 +70,12 @@ function extractProducts(response: ProductsApiResponse): Product[] {
 }
 
 function getProductImage(product: Product) {
+  const primaryImage =
+    product.images?.find((image) => image.isPrimary) ??
+    product.images?.[0];
+
   return (
+    primaryImage?.url ||
     product.image ||
     "https://placehold.co/120x140/F2ECE1/0F4C3A?text=Product"
   );
