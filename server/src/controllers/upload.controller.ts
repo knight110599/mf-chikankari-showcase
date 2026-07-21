@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { cloudinary } from "../lib/cloudinary";
+import { cloudinary } from "../lib/cloudinary.js";
 
 export async function uploadProductImage(
   req: Request,

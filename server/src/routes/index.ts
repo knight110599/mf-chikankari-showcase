@@ -1,14 +1,14 @@
 import { Router } from "express";
-import authRouter from "./auth.routes";
-import categoryRouter from "./category.routes";
-import productRouter from "./product.routes";
-import uploadRouter from "./upload.routes";
+import authRoutes from "./auth.routes.js";
+import categoryRoutes from "./category.routes.js";
+import productRoutes from "./product.routes.js";
+import uploadRoutes from "./upload.routes.js";
 
 const apiRouter = Router();
 
-apiRouter.use("/auth", authRouter);
-apiRouter.use("/categories", categoryRouter);
-apiRouter.use("/products", productRouter);
-apiRouter.use("/upload", uploadRouter);
+apiRouter.use("/auth", authRoutes);
+apiRouter.use("/categories", categoryRoutes);
+apiRouter.use("/products", productRoutes);
+apiRouter.use("/upload", uploadRoutes);
 
 export default apiRouter;
