@@ -18,8 +18,8 @@ function ProductCard({ product }: ProductCardProps) {
     : null;
 
   const imageUrl = apiProduct
-    ? primaryImage?.url ?? "/placeholder-product.jpg"
-    : product.image;
+  ? primaryImage?.url ?? "/placeholder-product.jpg"
+  : product.image;
 
   const imageAlt = apiProduct
     ? primaryImage?.altText ?? product.name

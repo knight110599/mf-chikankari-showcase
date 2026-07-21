@@ -29,9 +29,7 @@ function getPrimaryImageUrl(product: ApiProduct): string {
 function mapProductToFormValues(
   product: ApiProduct,
 ): ProductFormInitialValues {
-  const productWithActivity = product as ApiProduct & {
-    isActive?: boolean;
-  };
+  
 
   return {
     name: product.name,
@@ -45,9 +43,7 @@ function mapProductToFormValues(
     fabric: product.fabric ?? "",
     sizes: product.sizes.join(", "),
     featured: product.isFeatured,
-    active:
-      productWithActivity.isActive ??
-      product.status.toUpperCase() === "ACTIVE",
+    status: product.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
     image: getPrimaryImageUrl(product),
   };
 }

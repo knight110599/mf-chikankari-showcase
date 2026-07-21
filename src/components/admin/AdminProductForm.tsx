@@ -13,22 +13,19 @@ const productSchema = z.object({
   category: z.string().min(1, "Category is required"),
   price: z.coerce.number().min(1, "Selling price must be greater than 0"),
   wholesalePrice: z.coerce
-    .number()
-    .min(0, "Wholesale price cannot be negative")
-    .optional(),
-  stock: z.coerce
-    .number()
-    .int("Stock must be a whole number")
-    .min(0, "Stock cannot be negative"),
-  fabric: z.string().optional(),
-  sizes: z.string().optional(),
-  featured: z.boolean(),
-  active: z.boolean(),
-  image: z
-    .string()
-    .url("Enter a valid image URL")
-    .or(z.literal(""))
-    .optional(),
+  .number()
+  .min(0, "Wholesale price cannot be negative")
+  .optional(),
+
+stock: z.coerce
+  .number()
+  .int("Stock must be a whole number")
+  .min(0, "Stock cannot be negative"),
+
+fabric: z.string().optional(),
+sizes: z.string().optional(),
+featured: z.boolean(),
+status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
 });
 
 export type ProductFormInput = z.input<typeof productSchema>;
@@ -46,7 +43,7 @@ export interface ProductFormInitialValues {
   fabric: string;
   sizes: string;
   featured: boolean;
-  active: boolean;
+  status: "DRAFT" | "ACTIVE" | "ARCHIVED";
   image: string;
 }
 
@@ -87,7 +84,7 @@ const emptyValues: ProductFormInitialValues = {
   fabric: "",
   sizes: "",
   featured: false,
-  active: true,
+  status: "DRAFT",
   image: "",
 };
 
@@ -118,6 +115,9 @@ export default function AdminProductForm({
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [imageUrl, setImageUrl] = useState(initialValues.image);
+const [isUploadingImage, setIsUploadingImage] = useState(false);
+const [uploadError, setUploadError] = useState("");
   const [isSkuManuallyEdited, setIsSkuManuallyEdited] = useState(isEditMode);
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(isEditMode);
 
@@ -190,7 +190,47 @@ export default function AdminProductForm({
 
     void loadCategories();
   }, []);
+const uploadImage = async (
+  event: React.ChangeEvent<HTMLInputElement>,
+) => {
+  const file = event.target.files?.[0];
 
+  if (!file) return;
+
+  setUploadError("");
+  setIsUploadingImage(true);
+
+  try {
+    const token = localStorage.getItem("adminAccessToken");
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(`${API_URL}/upload/image`, {
+      method: "POST",
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : undefined,
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Upload failed.");
+    }
+
+    setImageUrl(result.image.url);
+  } catch (error) {
+    setUploadError(
+      error instanceof Error ? error.message : "Upload failed.",
+    );
+  } finally {
+    setIsUploadingImage(false);
+  }
+};
   const onSubmit = async (data: ProductFormData) => {
     if (isEditMode && !productId) {
       setSubmitError("Product ID is missing.");
@@ -202,28 +242,36 @@ export default function AdminProductForm({
 
     const token = localStorage.getItem("adminAccessToken");
 
-    const payload = {
-      name: data.name.trim(),
-      slug: data.slug.trim(),
-      sku: data.sku.trim().toUpperCase(),
-      description: data.description.trim(),
-      categoryId: data.category,
-      price: data.price,
-      wholesalePrice: data.wholesalePrice ?? 0,
-      stock: data.stock,
-      fabric: data.fabric?.trim() || undefined,
-      sizes:
-        data.sizes
-          ?.split(",")
-          .map((size) => size.trim())
-          .filter(Boolean) || [],
-      isFeatured: data.featured,
-      isActive: data.active,
-      imageUrl: data.image?.trim() || undefined,
-    };
+   const payload = {
+  name: data.name.trim(),
+  slug: data.slug.trim(),
+  sku: data.sku.trim().toUpperCase(),
+  description: data.description.trim(),
+  categoryId: data.category,
+  price: data.price,
+  wholesalePrice: data.wholesalePrice ?? 0,
+  stock: data.stock,
+  fabric: data.fabric?.trim() || undefined,
+  sizes:
+    data.sizes
+      ?.split(",")
+      .map((size) => size.trim())
+      .filter(Boolean) || [],
+  isFeatured: data.featured,
+  status: data.status,
+  images: imageUrl
+    ? [
+        {
+          url: imageUrl,
+          isPrimary: true,
+        },
+      ]
+    : [],
+};
 
-    const endpoint =
+const endpoint =
   mode === "edit" && productId
+  
     ? `${API_URL}/products/${encodeURIComponent(productId)}`
     : `${API_URL}/products`;
 
@@ -526,54 +574,62 @@ export default function AdminProductForm({
           </div>
 
           <label className="mt-5 block">
-            <span className="text-sm font-semibold text-[#263D35]">
-              Image URL
-            </span>
-            <input
-              type="url"
-              {...register("image")}
-              placeholder="https://example.com/product.jpg"
-              className={inputClassName}
-            />
-            {errors.image && (
-              <p className="mt-2 text-xs text-red-600">
-                {errors.image.message}
-              </p>
-            )}
-          </label>
+  <span className="text-sm font-semibold text-[#263D35]">
+    Product Image
+  </span>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#DDD2C0] bg-[#FCFAF7] p-4">
-              <input
-                type="checkbox"
-                {...register("featured")}
-                className="mt-1 h-4 w-4 accent-[#0F4C3A]"
-              />
-              <div>
-                <p className="text-sm font-semibold text-[#263D35]">
-                  Featured Product
-                </p>
-                <p className="mt-1 text-xs leading-5 text-[#8A918D]">
-                  Highlight this product on the storefront.
-                </p>
-              </div>
-            </label>
+  <input
+    type="file"
+    accept="image/*"
+    onChange={uploadImage}
+    disabled={isUploadingImage}
+    className={inputClassName}
+  />
 
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-[#DDD2C0] bg-[#FCFAF7] p-4">
-              <input
-                type="checkbox"
-                {...register("active")}
-                className="mt-1 h-4 w-4 accent-[#0F4C3A]"
-              />
-              <div>
-                <p className="text-sm font-semibold text-[#263D35]">
-                  Active Product
-                </p>
-                <p className="mt-1 text-xs leading-5 text-[#8A918D]">
-                  Make the product visible and available.
-                </p>
-              </div>
-            </label>
+  {isUploadingImage && (
+    <p className="mt-2 text-sm text-[#B38E49]">
+      Uploading image...
+    </p>
+  )}
+
+  {uploadError && (
+    <p className="mt-2 text-sm text-red-600">
+      {uploadError}
+    </p>
+  )}
+
+  {imageUrl && (
+    <img
+      src={imageUrl}
+      alt="Product preview"
+      className="mt-4 h-40 w-40 rounded-xl border border-[#DDD2C0] object-cover"
+    />
+  )}
+</label>
+
+<div className="mt-6 grid gap-4 sm:grid-cols-2">
+            
+
+            <label className="block">
+  <span className="text-sm font-semibold text-[#263D35]">
+    Product Status
+  </span>
+
+  <select
+    {...register("status")}
+    className={inputClassName}
+  >
+    <option value="DRAFT">Draft</option>
+    <option value="ACTIVE">Active</option>
+    <option value="ARCHIVED">Archived</option>
+  </select>
+
+  {errors.status && (
+    <p className="mt-2 text-xs text-red-600">
+      {errors.status.message}
+    </p>
+  )}
+</label>
           </div>
         </div>
 
