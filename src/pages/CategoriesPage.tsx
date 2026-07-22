@@ -1,30 +1,71 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import kurtis from "../assets/images/kurtis.jpg";
-import suits from "../assets/images/suits.jpg";
-import dupattas from "../assets/images/dupattas.jpg";
+import { AlertCircle, FolderTree, Loader2 } from "lucide-react";
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-const categories = [
-  {
-    name: "Kurtis",
-    slug: "kurtis",
-    description: "Everyday and festive Lucknowi Chikankari kurtis.",
-    image: kurtis,
-  },
-  {
-    name: "Suits",
-    slug: "suits",
-    description: "Premium handcrafted suit sets for elegant occasions.",
-    image: suits,
-  },
-  {
-    name: "Dupattas",
-    slug: "dupattas",
-    description: "Fine embroidered dupattas with traditional detailing.",
-    image: dupattas,
-  },
-];
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+type CategoriesResponse = {
+  success?: boolean;
+  message?: string;
+  data?: Category[];
+};
 
 function CategoriesPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+const [isLoading, setIsLoading] = useState(true);
+const [errorMessage, setErrorMessage] = useState("");
+
+useEffect(() => {
+  const loadCategories = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      const response = await fetch(
+        `${API_URL}/categories?includeInactive=false&limit=100`,
+      );
+
+      const result = (await response.json()) as CategoriesResponse;
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Unable to load categories.",
+        );
+      }
+
+      const activeCategories = Array.isArray(result.data)
+        ? result.data
+            .filter((category) => category.isActive)
+            .sort(
+              (firstCategory, secondCategory) =>
+                firstCategory.sortOrder - secondCategory.sortOrder,
+            )
+        : [];
+
+      setCategories(activeCategories);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to load categories.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  void loadCategories();
+}, []);
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
       <div className="max-w-3xl">
@@ -50,9 +91,39 @@ function CategoriesPage() {
           the right collection for retail or wholesale requirements.
         </p>
       </div>
+{isLoading && (
+  <div className="mt-12 flex items-center justify-center gap-3 rounded-[28px] border border-[#E8DCC5] bg-white px-6 py-12 text-[#0F4C3A]">
+    <Loader2 size={22} className="animate-spin" />
+    <span>Loading categories...</span>
+  </div>
+)}
 
-      <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-        {categories.map((category) => (
+{errorMessage && !isLoading && (
+  <div className="mt-12 flex items-center gap-3 rounded-[28px] border border-red-200 bg-red-50 px-6 py-5 text-sm text-red-700">
+    <AlertCircle size={20} />
+    {errorMessage}
+  </div>
+)}
+
+{!isLoading && !errorMessage && categories.length === 0 && (
+  <div className="mt-12 rounded-[28px] border border-[#E8DCC5] bg-white px-6 py-12 text-center">
+    <FolderTree
+      size={30}
+      className="mx-auto text-[#0F4C3A]"
+    />
+
+    <p className="mt-4 font-semibold text-[#0F4C3A]">
+      No categories available
+    </p>
+
+    <p className="mt-2 text-sm text-gray-600">
+      Categories will appear here once they are published.
+    </p>
+  </div>
+)}
+      {!isLoading && !errorMessage && categories.length > 0 && (
+  <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+    {categories.map((category) => (
           <Link
             key={category.slug}
             to={`/categories/${category.slug}`}
@@ -60,7 +131,10 @@ function CategoriesPage() {
           >
             <div className="relative h-80 overflow-hidden bg-[#EFE8DB]">
               <img
-                src={category.image}
+                src={
+  category.imageUrl ||
+  "https://placehold.co/800x1000?text=MF+Chikankari"
+}
                 alt={`${category.name} collection`}
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -102,6 +176,7 @@ function CategoriesPage() {
           </Link>
         ))}
       </div>
+      )}
     </section>
   );
 }
