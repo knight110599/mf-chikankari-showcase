@@ -87,7 +87,9 @@ export function getProducts(options: GetProductsOptions = {}) {
 }
 
 export function getFeaturedProducts() {
-  return apiRequest<ProductsResponse>("/products/featured");
+  return getProducts({
+    isFeatured: true,
+  });
 }
 
 export function getProductBySlug(slug: string) {
