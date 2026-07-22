@@ -1,117 +1,229 @@
+import { useEffect, useState } from "react";
+import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import kurtis from "/src/assets/images/kurtis.jpg";
-import suits from "/src/assets/images/suits.jpg";
-import dupattas from "/src/assets/images/dupattas.jpg";
 
-const collections = [
-  {
-    title: "Women's Kurtis",
-    desc: "Elegant everyday and festive Chikankari kurtis.",
-    image: kurtis,
-    slug: "kurtis",
-  },
-  {
-    title: "Chikankari Suits",
-    desc: "Premium handcrafted suit sets for refined occasions.",
-    image: suits,
-    slug: "suits",
-  },
-  {
-    title: "Dupattas",
-    desc: "Finely embroidered dupattas crafted with traditional detail.",
-    image: dupattas,
-    slug: "dupattas",
-  },
-];
+import kurtisImage from "../assets/images/collections/womens-kurtis.webp";
+import suitsImage from "../assets/images/collections/chikankari-suits.webp";
+import dupattasImage from "../assets/images/collections/dupattas.webp";
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  isActive: boolean;
+  sortOrder: number;
+};
+
+type CategoriesResponse = {
+  success?: boolean;
+  message?: string;
+  data?: Category[];
+};
+
+const curatedImages: Record<string, string> = {
+  kurtis: kurtisImage,
+  suits: suitsImage,
+  dupattas: dupattasImage,
+};
 
 function Collections() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const response = await fetch(
+          `${API_URL}/categories?includeInactive=false&limit=100`,
+        );
+
+        const result = (await response.json()) as CategoriesResponse;
+
+        if (!response.ok) {
+          throw new Error(
+            result.message || "Unable to load collections.",
+          );
+        }
+
+        const activeCategories = Array.isArray(result.data)
+          ? result.data
+              .filter((category) => category.isActive)
+              .sort(
+                (firstCategory, secondCategory) =>
+                  firstCategory.sortOrder - secondCategory.sortOrder,
+              )
+          : [];
+
+        setCategories(activeCategories);
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to load collections.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadCategories();
+  }, []);
+
+  const getCategoryImage = (category: Category) =>
+    curatedImages[category.slug] ||
+    category.imageUrl ||
+    "https://placehold.co/1200x900?text=MF+Chikankari";
+
   return (
     <section
       id="collections"
-      className="mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-20 lg:px-12 lg:py-24"
+      className="overflow-hidden bg-[#F8F5F0] py-20 sm:py-24 lg:py-32"
     >
-      <div className="max-w-3xl">
-        <p
-          className="text-xs uppercase tracking-[0.35em] text-[#C9A86A] sm:text-sm"
-          style={{ fontFamily: "Poppins" }}
-        >
-          Our Collection
-        </p>
+      <div className="mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-12">
+        <div className="grid gap-8 border-b border-[#D9C8A8] pb-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:pb-14">
+          <div>
+            <div className="mb-6 h-px w-16 bg-[#C9A86A]" />
 
-        <h2
-          className="mt-3 text-4xl leading-tight text-[#0F4C3A] sm:text-5xl lg:text-6xl"
-          style={{ fontFamily: "Cormorant Garamond" }}
-        >
-          Crafted for Every Occasion
-        </h2>
+            <p
+              className="text-xs font-medium uppercase tracking-[0.38em] text-[#B38E49] sm:text-sm"
+              style={{ fontFamily: "Poppins" }}
+            >
+              Our Collections
+            </p>
 
-        <p
-          className="mt-5 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg"
-          style={{ fontFamily: "Poppins" }}
-        >
-          Discover our handcrafted Lucknowi Chikankari collection, specially
-          curated for boutiques, wholesalers and retailers.
-        </p>
-      </div>
+            <h2
+              className="mt-5 max-w-xl text-[46px] leading-[0.98] tracking-[-0.025em] text-[#0F4C3A] sm:text-6xl lg:text-[76px]"
+              style={{ fontFamily: "Cormorant Garamond" }}
+            >
+              Crafted for
+              <br />
+              every expression
+            </h2>
+          </div>
 
-      <div className="mt-10 grid items-stretch gap-6 sm:mt-12 md:grid-cols-2 lg:mt-14 lg:grid-cols-3 lg:gap-8">
-        {collections.map((item) => (
-          <Link
-            key={item.title}
-            to={`/categories/${item.slug}`}
-            className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-[#E8DCC5] bg-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#D8C29A] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#0F4C3A] focus:ring-offset-4"
+          <div className="lg:pb-2 lg:pl-12">
+            <p
+              className="max-w-xl text-base leading-8 text-[#59635F] sm:text-lg"
+              style={{ fontFamily: "Poppins" }}
+            >
+              Explore timeless silhouettes shaped by Lucknow’s celebrated
+              Chikankari tradition—created for everyday elegance, special
+              occasions and refined wardrobes.
+            </p>
+
+            <p
+              className="mt-6 text-xs uppercase tracking-[0.28em] text-[#0F4C3A]"
+              style={{ fontFamily: "Poppins" }}
+            >
+              Heritage craft • Contemporary elegance
+            </p>
+          </div>
+        </div>
+
+        {isLoading && (
+          <div className="mt-12 flex min-h-56 items-center justify-center gap-3 border border-[#E8DCC5] bg-white/60 text-[#0F4C3A]">
+            <Loader2 size={22} className="animate-spin" />
+            <span style={{ fontFamily: "Poppins" }}>
+              Loading collections...
+            </span>
+          </div>
+        )}
+
+        {errorMessage && !isLoading && (
+          <div className="mt-12 flex items-center gap-3 border border-red-200 bg-red-50 px-6 py-5 text-sm text-red-700">
+            <AlertCircle size={20} />
+            {errorMessage}
+          </div>
+        )}
+
+        {!isLoading && !errorMessage && categories.length > 0 && (
+          <div className="mt-12 grid gap-5 lg:grid-cols-2 lg:gap-6">
+            {categories.map((category, index) => {
+              const isFeatured = index === 0;
+
+              return (
+                <Link
+                  key={category.id}
+                  to={`/categories/${category.slug}`}
+                  className={`group relative isolate overflow-hidden bg-[#0F4C3A] ${
+  isFeatured
+    ? "min-h-[500px] lg:col-span-2 lg:min-h-[640px]"
+    : "min-h-[460px] lg:min-h-[540px]"
+}`}
+                >
+                  <img
+                    src={getCategoryImage(category)}
+                    alt={`${category.name} collection`}
+                    loading={isFeatured ? "eager" : "lazy"}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.045]"
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+
+                  <div className="absolute inset-x-0 bottom-0 z-10 p-6 sm:p-8 lg:p-10">
+                    <p
+                      className="text-[11px] uppercase tracking-[0.32em] text-white/75"
+                      style={{ fontFamily: "Poppins" }}
+                    >
+                      {isFeatured
+                        ? "Featured Collection"
+                        : "Curated Collection"}
+                    </p>
+
+                    <div className="mt-3 flex items-end justify-between gap-6">
+                      <div>
+                        <h3
+                          className={`leading-none text-white ${
+                            isFeatured
+                              ? "text-5xl sm:text-6xl lg:text-7xl"
+                              : "text-4xl sm:text-5xl"
+                          }`}
+                          style={{ fontFamily: "Cormorant Garamond" }}
+                        >
+                          {category.name}
+                        </h3>
+
+                        {category.description && (
+                          <p
+                            className="mt-4 max-w-xl text-sm leading-7 text-white/80 sm:text-base"
+                            style={{ fontFamily: "Poppins" }}
+                          >
+                            {category.description}
+                          </p>
+                        )}
+                      </div>
+
+                      <span className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/50 text-white transition-all duration-300 group-hover:border-white group-hover:bg-white group-hover:text-[#0F4C3A] sm:flex">
+                        <ArrowRight
+                          size={19}
+                          className="transition-transform duration-300 group-hover:translate-x-0.5"
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {!isLoading && !errorMessage && categories.length === 0 && (
+          <div
+            className="mt-12 border border-[#E8DCC5] bg-white/60 px-6 py-14 text-center text-[#59635F]"
+            style={{ fontFamily: "Poppins" }}
           >
-            <div className="relative h-72 overflow-hidden sm:h-80">
-              <img
-                src={item.image}
-                alt={item.title}
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              />
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
-
-              <div className="absolute bottom-5 left-5 right-5">
-                <span
-                  className="inline-flex rounded-full bg-white/90 px-4 py-2 text-xs font-medium text-[#0F4C3A] backdrop-blur-sm"
-                  style={{ fontFamily: "Poppins" }}
-                >
-                  Handcrafted Collection
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-1 flex-col p-6 sm:p-7 lg:p-8">
-              <h3
-                className="text-3xl leading-tight text-[#0F4C3A]"
-                style={{ fontFamily: "Cormorant Garamond" }}
-              >
-                {item.title}
-              </h3>
-
-              <p
-                className="mt-3 flex-1 text-sm leading-6 text-gray-600 sm:text-base"
-                style={{ fontFamily: "Poppins" }}
-              >
-                {item.desc}
-              </p>
-
-              <span
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#0F4C3A] transition-colors duration-300 group-hover:text-[#C9A86A]"
-                style={{ fontFamily: "Poppins" }}
-              >
-                View Collection
-
-                <span
-                  aria-hidden="true"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                >
-                  →
-                </span>
-              </span>
-            </div>
-          </Link>
-        ))}
+            No published collections are currently available.
+          </div>
+        )}
       </div>
     </section>
   );

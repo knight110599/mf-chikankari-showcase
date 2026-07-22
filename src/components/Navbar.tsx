@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Link,
   NavLink,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 import {
@@ -40,13 +41,39 @@ const whatsappUrl =
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  const location = useLocation();
   const navigate = useNavigate();
+
   const {
     isAuthenticated,
     user,
     logout,
   } = useAuth();
+
+  const isHomePage = location.pathname === "/";
+  const isTransparent = isHomePage && !scrolled && !open;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -59,8 +86,20 @@ function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-[#E8DCC5] bg-[#F8F5F0]/90 backdrop-blur-md">
-      <div className="mx-auto flex h-24 w-full max-w-7xl items-center justify-between px-5 sm:px-8 md:h-28 lg:px-12">
+    <nav
+  className={`sticky top-0 z-50 w-full transition-all duration-500 ${
+    isTransparent
+      ? "border-b border-transparent bg-[#F8F5F0]/80 backdrop-blur-md"
+      : "border-b border-[#E8DCC5] bg-[#F8F5F0]/95 shadow-[0_8px_30px_rgba(15,76,58,0.06)] backdrop-blur-xl"
+  }`}
+>
+      <div
+        className={`mx-auto flex w-full max-w-7xl items-center justify-between px-5 transition-all duration-500 sm:px-8 lg:px-12 ${
+          scrolled || !isHomePage
+            ? "h-20 md:h-24"
+            : "h-24 md:h-28"
+        }`}
+      >
         <Link
           to="/"
           onClick={closeMenu}
@@ -102,7 +141,7 @@ function Navbar() {
                   `group relative pb-1 text-[15px] font-medium transition-colors duration-300 ${
                     isActive
                       ? "text-[#0F4C3A]"
-                      : "text-[#555] hover:text-[#0F4C3A]"
+                      : "text-[#4F5753] hover:text-[#0F4C3A]"
                   }`
                 }
               >
@@ -129,7 +168,7 @@ function Navbar() {
             <>
               <Link
                 to="/account"
-                className="inline-flex h-11 max-w-52 items-center gap-2 rounded-full border border-[#D9C8A8] px-5 text-sm font-semibold text-[#0F4C3A] transition hover:border-[#0F4C3A] hover:bg-[#0F4C3A]/5"
+                className="inline-flex h-11 max-w-52 items-center gap-2 rounded-full border border-[#D9C8A8] bg-[#F8F5F0]/55 px-5 text-sm font-semibold text-[#0F4C3A] backdrop-blur-md transition hover:border-[#0F4C3A] hover:bg-[#F8F5F0]"
               >
                 <UserRound className="h-4 w-4 shrink-0" />
 
@@ -151,7 +190,7 @@ function Navbar() {
             <>
               <Link
                 to="/login"
-                className="inline-flex h-11 items-center rounded-full border border-[#D9C8A8] px-5 text-sm font-semibold text-[#0F4C3A] transition hover:border-[#0F4C3A] hover:bg-[#0F4C3A]/5"
+                className="inline-flex h-11 items-center rounded-full border border-[#D9C8A8] bg-[#F8F5F0]/55 px-5 text-sm font-semibold text-[#0F4C3A] backdrop-blur-md transition hover:border-[#0F4C3A] hover:bg-[#F8F5F0]"
               >
                 Login
               </Link>
@@ -169,7 +208,7 @@ function Navbar() {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full bg-[#0F4C3A] px-5 py-2 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:bg-[#0A3D2F]"
+            className="rounded-full bg-[#0F4C3A] px-5 py-2 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0A3D2F] hover:shadow-lg"
             style={{ fontFamily: "Poppins" }}
           >
             WhatsApp
@@ -179,7 +218,7 @@ function Navbar() {
         <button
           type="button"
           onClick={() => setOpen((current) => !current)}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB] md:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB]/80 md:hidden"
           aria-label={
             open
               ? "Close navigation menu"
@@ -195,7 +234,7 @@ function Navbar() {
       {open && (
         <div
           id="mobile-navigation"
-          className="absolute left-0 top-24 w-full border-t border-[#E8DCC5] bg-[#F8F5F0] shadow-lg md:hidden"
+          className="absolute left-0 top-full w-full border-t border-[#E8DCC5] bg-[#F8F5F0]/98 shadow-xl backdrop-blur-xl md:hidden"
         >
           <ul
             className="flex flex-col px-5 py-6 sm:px-8"

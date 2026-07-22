@@ -1,157 +1,128 @@
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  Scissors,
-  Sparkles,
-  Store,
-  Truck,
-} from "lucide-react";
-import heroKurti from "../assets/images/products/hero-kurti.png";
-
-const highlights = [
-  {
-    icon: <Sparkles size={22} />,
-    title: "500+ Designs",
-    description: "Latest Collections",
-    accent: true,
-  },
-  {
-    icon: <Truck size={22} />,
-    title: "Pan India",
-    description: "Wholesale Delivery",
-  },
-  {
-    icon: <Scissors size={22} />,
-    title: "Handcrafted",
-    description: "Authentic Chikankari",
-  },
-  {
-    icon: <Store size={22} />,
-    title: "Trusted Since 1998",
-    description: "Lucknow Heritage",
-  },
-];
+import heroHome from "../assets/images/hero/hero-home.webp";
 
 function Hero() {
   return (
-    <section className="mx-auto grid min-h-[calc(100vh-112px)] max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-2 lg:gap-16 lg:px-12">
-      {/* Content */}
-      <motion.div
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-        className="max-w-2xl"
-      >
-        <p
-          className="mb-4 text-xs uppercase tracking-[0.35em] text-[#C9A86A] sm:text-sm sm:tracking-[0.4em]"
-          style={{ fontFamily: "Poppins" }}
-        >
-          Lucknow • Since 1998
-        </p>
-
-        <h1
-          className="text-5xl leading-[1.05] text-[#0F4C3A] sm:text-6xl lg:text-7xl"
-          style={{ fontFamily: "Cormorant Garamond" }}
-        >
-          Authentic
-          <br />
-          Lucknowi
-          <br />
-          Chikankari
-        </h1>
-
-        <p
-          className="mt-6 max-w-xl text-base leading-8 text-[#555] sm:text-lg"
-          style={{ fontFamily: "Poppins" }}
-        >
-          Premium Lucknowi Chikankari kurtis, suits and handcrafted
-          collections for wholesalers, boutiques and resellers across India.
-        </p>
-
-        {/* Mobile image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="mt-8 lg:hidden"
-        >
-          <div className="mx-auto w-full max-w-[390px] overflow-hidden rounded-[30px] border border-[#D9C8A8] bg-[#EFE8DB] p-4 shadow-xl">
-            <img
-              src={heroKurti}
-              alt="Handcrafted MF Chikankari outfit"
-              className="aspect-[4/5] h-full w-full object-cover"
-            />
-          </div>
-        </motion.div>
-
-        {/* Actions */}
-        <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-          <Link
-            to="/products"
-            className="inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#0F4C3A] px-8 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0A3D2F] hover:shadow-lg"
-            style={{ fontFamily: "Poppins" }}
+    <section className="overflow-hidden bg-[#F8F5F0]">
+      <div className="mx-auto max-w-[1750px] px-4 pb-8 pt-4 sm:px-6 sm:pb-12 lg:px-10 lg:pb-16">
+        <div className="grid overflow-hidden border border-[#E8DCC5] bg-[#F8F5F0] shadow-[0_24px_70px_rgba(15,76,58,0.12)] lg:min-h-[640px] lg:grid-cols-[42%_58%]">
+          {/* Content */}
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative z-10 flex flex-col justify-center px-6 py-16 sm:px-10 sm:py-20 lg:px-16 lg:py-24 xl:px-24"
           >
-            Explore Products
-            <ArrowRight size={18} />
-          </Link>
+            <div className="mb-8 h-px w-20 bg-[#C9A86A]" />
 
-          <Link
-            to="/contact"
-            className="inline-flex min-h-14 items-center justify-center rounded-full border border-[#0F4C3A] px-8 font-medium text-[#0F4C3A] transition-all duration-300 hover:bg-[#0F4C3A] hover:text-white"
-            style={{ fontFamily: "Poppins" }}
-          >
-            Contact Us
-          </Link>
-        </div>
-
-        {/* Highlights */}
-        <div
-          className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2"
-          style={{ fontFamily: "Poppins" }}
-        >
-          {highlights.map((item) => (
-            <div
-              key={item.title}
-              className="flex min-h-[92px] items-center gap-4 rounded-2xl border border-[#E8DCC5] bg-white/60 p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-lg"
+            <p
+              className="text-xs font-medium uppercase tracking-[0.34em] text-[#B38E49] sm:text-sm sm:tracking-[0.42em]"
+              style={{ fontFamily: "Poppins" }}
             >
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#F8F5F0] ${
-                  item.accent ? "text-[#C9A86A]" : "text-[#0F4C3A]"
-                }`}
+              Lucknow • Since 1998
+            </p>
+
+            <h1
+              className="mt-5 max-w-[520px] text-[48px] leading-[0.96] tracking-[-0.035em] text-[#0F4C3A] sm:text-6xl lg:text-[72px]"
+              style={{ fontFamily: "Cormorant Garamond" }}
+            >
+              Timeless Chikankari,
+              <br />
+              Crafted in Lucknow
+            </h1>
+
+            <p
+              className="mt-7 max-w-lg text-base leading-8 text-[#4F5A56] sm:text-lg"
+              style={{ fontFamily: "Poppins" }}
+            >
+              Discover handcrafted Lucknowi Chikankari shaped by heritage,
+              refined craftsmanship and contemporary elegance.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
+              <Link
+                to="/products"
+                className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full bg-[#0F4C3A] px-8 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0A3D2F] hover:shadow-xl"
+                style={{ fontFamily: "Poppins" }}
               >
-                {item.icon}
+                Explore Collection
+                <ArrowRight
+                  size={18}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </Link>
+
+              <Link
+                to="/contact"
+                className="inline-flex min-h-14 items-center justify-center rounded-full border border-[#0F4C3A]/50 px-8 font-medium text-[#0F4C3A] transition-all duration-300 hover:bg-[#0F4C3A] hover:text-white"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Contact Us
+              </Link>
+            </div>
+
+            <div
+              className="mt-10 grid grid-cols-3 gap-4 border-t border-[#D9C8A8] pt-6"
+              style={{ fontFamily: "Poppins" }}
+            >
+              <div>
+                <p className="text-lg font-semibold text-[#0F4C3A] sm:text-xl">
+                  1998
+                </p>
+                <p className="mt-1 text-xs leading-5 text-[#6A746F]">
+                  Heritage since
+                </p>
               </div>
 
               <div>
-                <h2 className="font-semibold text-[#0F4C3A]">
-                  {item.title}
-                </h2>
+                <p className="text-lg font-semibold text-[#0F4C3A] sm:text-xl">
+                  500+
+                </p>
+                <p className="mt-1 text-xs leading-5 text-[#6A746F]">
+                  Original designs
+                </p>
+              </div>
 
-                <p className="mt-1 text-sm text-gray-500">
-                  {item.description}
+              <div>
+                <p className="text-lg font-semibold text-[#0F4C3A] sm:text-xl">
+                  Pan India
+                </p>
+                <p className="mt-1 text-xs leading-5 text-[#6A746F]">
+                  Delivery network
                 </p>
               </div>
             </div>
-          ))}
-        </div>
-      </motion.div>
+          </motion.div>
 
-      {/* Desktop image */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.94 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.1 }}
-        className="hidden justify-end lg:flex"
-      >
-        <div className="h-[560px] w-full max-w-[440px] overflow-hidden rounded-[40px] border border-[#D9C8A8] bg-[#EFE8DB] p-6 shadow-2xl">
-          <img
-            src={heroKurti}
-            alt="Handcrafted MF Chikankari outfit"
-            className="h-full w-full object-cover"
-          />
+          {/* Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 1.08 }}
+animate={{ opacity: 1, scale: 1 }}
+transition={{
+  duration: 1.8,
+  ease: [0.22, 1, 0.36, 1],
+}}
+            className="relative min-h-[420px] sm:min-h-[540px] lg:min-h-[660px]"
+          >
+            <img
+              src={heroHome}
+              alt="Woman wearing handcrafted Lucknowi Chikankari in a heritage setting"
+              className="absolute inset-0 h-full w-full object-cover object-[42%_center] sm:object-[48%_center] lg:object-[45%_center]"
+            />
+
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent p-6 sm:p-8">
+              <p
+                className="text-xs uppercase tracking-[0.32em] text-white/90"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Heritage • Craft • Elegance
+              </p>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
