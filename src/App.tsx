@@ -16,14 +16,17 @@ import ProductsPage from "./pages/ProductsPage";
 
 import AccountPage from "./pages/account/AccountPage";
 
+import AdminAddProductPage from "./pages/admin/AdminAddProductPage";
+import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
-import AdminAddProductPage from "./pages/admin/AdminAddProductPage";
-import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
+
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
+
 function App() {
   return (
     <Routes>
@@ -35,7 +38,10 @@ function App() {
         <Route path="contact" element={<ContactPage />} />
 
         <Route path="products" element={<ProductsPage />} />
-        <Route path="products/:slug" element={<ProductDetailsPage />} />
+        <Route
+          path="products/:slug"
+          element={<ProductDetailsPage />}
+        />
 
         <Route path="categories" element={<CategoriesPage />} />
         <Route
@@ -56,7 +62,10 @@ function App() {
       </Route>
 
       {/* Public admin login */}
-      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin/login"
+        element={<AdminLoginPage />}
+      />
 
       {/* Protected admin area */}
       <Route element={<AdminProtectedRoute />}>
@@ -66,17 +75,26 @@ function App() {
             element={<AdminDashboardPage />}
           />
 
-          <Route path="products" element={<AdminProductsPage />} />
+          <Route
+            path="products"
+            element={<AdminProductsPage />}
+          />
 
-  <Route
-    path="products/new"
-    element={<AdminAddProductPage />}
-  />
-</Route>
-<Route
-  path="/admin/products/:id/edit"
-  element={<AdminEditProductPage />}
-/>
+          <Route
+            path="products/new"
+            element={<AdminAddProductPage />}
+          />
+
+          <Route
+            path="products/:id/edit"
+            element={<AdminEditProductPage />}
+          />
+
+          <Route
+            path="categories"
+            element={<AdminCategoriesPage />}
+          />
+        </Route>
       </Route>
     </Routes>
   );

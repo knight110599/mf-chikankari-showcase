@@ -54,13 +54,13 @@ export const getById = async (
 ): Promise<void> => {
   const id = req.params.id;
 
-  if (typeof id !== "string") {
-    res.status(400).json({
-      success: false,
-      message: "Category ID is required.",
-    });
-    return;
-  }
+  if (typeof id !== "string" || !id) {
+  res.status(400).json({
+    success: false,
+    message: "Category ID is required.",
+  });
+  return;
+}
 
   try {
     const category = await getCategoryById(id);
@@ -100,13 +100,7 @@ if (typeof id !== "string") {
   return;
 }
 
-  if (!id) {
-    res.status(400).json({
-      success: false,
-      message: "Category ID is required.",
-    });
-    return;
-  }
+
 
   try {
     const category = await updateCategory(id, req.body);
