@@ -372,9 +372,7 @@ function ProductDetailsPage() {
                     : "text-red-600"
                 }`}
               >
-                {productStock > 0
-                  ? `${productStock} in stock`
-                  : "Out of stock"}
+                {productStock > 0 ? "In Stock" : "Out of Stock"}
               </span>
             </div>
 
