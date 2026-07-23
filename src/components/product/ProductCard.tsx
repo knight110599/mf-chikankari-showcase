@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Product } from "../../data/products";
 import type { ApiProduct } from "../../services/product.service";
@@ -18,8 +19,8 @@ function ProductCard({ product }: ProductCardProps) {
     : null;
 
   const imageUrl = apiProduct
-  ? primaryImage?.url ?? "/placeholder-product.jpg"
-  : product.image;
+    ? primaryImage?.url ?? "/placeholder-product.jpg"
+    : product.image;
 
   const imageAlt = apiProduct
     ? primaryImage?.altText ?? product.name
@@ -29,46 +30,132 @@ function ProductCard({ product }: ProductCardProps) {
     ? product.category.name
     : product.category;
 
-  const fabricName = product.fabric ?? "Fabric details unavailable";
+  const fabricName =
+    product.fabric?.trim() || "Handcrafted Chikankari";
 
   const price = Number(product.price);
 
+  const wholesalePrice =
+    "wholesalePrice" in product && product.wholesalePrice
+      ? Number(product.wholesalePrice)
+      : null;
+
+  const isFeatured =
+    "featured" in product
+      ? Boolean(product.featured)
+      : "isFeatured" in product
+        ? Boolean(product.isFeatured)
+        : false;
+
   return (
-    <article className="group overflow-hidden rounded-[28px] border border-[#E8DCC5] bg-white transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl">
-      <Link to={`/products/${product.slug}`} className="block">
-        <div className="h-80 overflow-hidden bg-[#EFE8DB]">
+    <article className="group relative transition-transform duration-500 hover:-translate-y-2">
+      <Link
+        to={`/products/${product.slug}`}
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F4C3A] focus-visible:ring-offset-4"
+      >
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[8px] bg-[#DDD3C3]">
           <img
             src={imageUrl}
             alt={imageAlt}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
           />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-90" />
+
+          <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+            {isFeatured && (
+              <span
+                className="bg-white/90 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0F4C3A] backdrop-blur-sm"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Featured
+              </span>
+            )}
+
+            {wholesalePrice && (
+              <span
+                className="bg-[#0F4C3A]/90 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-sm"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Wholesale
+              </span>
+            )}
+          </div>
+
+          <div className="absolute bottom-4 right-4 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full bg-white text-[#0F4C3A] opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+            <ArrowUpRight size={19} />
+          </div>
         </div>
 
-        <div className="p-6">
-          <p className="text-xs uppercase tracking-[0.25em] text-[#C9A86A]">
+        <div className="border-b border-[#D9C8A8] py-7">
+          <p
+            className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#B38E49]"
+            style={{ fontFamily: "Poppins" }}
+          >
             {categoryName}
           </p>
 
-          <h2
-            className="mt-3 text-2xl leading-tight text-[#0F4C3A]"
+          <h3
+            className="mt-3 text-[34px] leading-[1.05] text-[#0F4C3A] transition-colors duration-300 group-hover:text-[#B38E49]"
             style={{ fontFamily: "Cormorant Garamond" }}
           >
             {product.name}
-          </h2>
+          </h3>
 
-          <p className="mt-2 text-sm text-gray-500">
+          <p
+            className="mt-3 text-sm leading-6 text-[#6C746F]"
+            style={{ fontFamily: "Poppins" }}
+          >
             {fabricName}
           </p>
 
-          <div className="mt-5 flex items-center justify-between">
-            <span className="font-semibold text-[#0F4C3A]">
-              ₹{price.toLocaleString("en-IN")}
-            </span>
+          <div className="mt-6 flex items-end justify-between gap-5">
+            <div>
+              <p
+                className="text-[10px] uppercase tracking-[0.18em] text-[#8A918D]"
+                style={{ fontFamily: "Poppins" }}
+              >
+                Retail
+              </p>
 
-            <span className="text-sm font-medium text-[#0F4C3A]">
-              View Details →
-            </span>
+              <p
+                className="mt-1 text-lg font-semibold text-[#0F4C3A]"
+                style={{ fontFamily: "Poppins" }}
+              >
+                ₹{price.toLocaleString("en-IN")}
+              </p>
+            </div>
+
+            {wholesalePrice && (
+              <div className="text-right">
+                <p
+                  className="text-[10px] uppercase tracking-[0.18em] text-[#8A918D]"
+                  style={{ fontFamily: "Poppins" }}
+                >
+                  Wholesale
+                </p>
+
+                <p
+                  className="mt-1 text-lg font-semibold text-[#0F4C3A]"
+                  style={{ fontFamily: "Poppins" }}
+                >
+                  ₹{wholesalePrice.toLocaleString("en-IN")}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div
+            className="mt-7 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#0F4C3A]"
+            style={{ fontFamily: "Poppins" }}
+          >
+            View product
+
+            <ArrowUpRight
+              size={16}
+              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            />
           </div>
         </div>
       </Link>
