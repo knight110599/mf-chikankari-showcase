@@ -4,7 +4,6 @@ import {
   AlertCircle,
   ArrowRight,
   FolderSearch,
-  Loader2,
   RefreshCcw,
   Sparkles,
 } from "lucide-react";
