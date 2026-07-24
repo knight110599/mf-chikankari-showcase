@@ -105,14 +105,16 @@ export const createProductSchema = z.object({
       .default([]),
 
     status: z
-      .enum(["DRAFT", "ACTIVE", "ARCHIVED"])
-      .optional(),
+  .enum(["DRAFT", "ACTIVE", "ARCHIVED"])
+  .optional(),
 
-    isFeatured: z.boolean().optional(),
+isFeatured: z.boolean().optional(),
 
-    categoryId: z
-      .string()
-      .cuid("Invalid category ID."),
+isNewArrival: z.boolean().optional(),
+
+categoryId: z
+  .string()
+  .cuid("Invalid category ID."),
 
     images: z
       .array(productImageSchema)
@@ -164,16 +166,23 @@ export const productQuerySchema = z.object({
       .optional(),
 
     featured: z
-      .enum(["true", "false"])
-      .optional()
-      .transform((value) =>
-        value === undefined ? undefined : value === "true",
-      ),
+  .enum(["true", "false"])
+  .optional()
+  .transform((value) =>
+    value === undefined ? undefined : value === "true",
+  ),
 
-    minPrice: z.coerce
-      .number()
-      .min(0, "Minimum price cannot be negative.")
-      .optional(),
+newArrival: z
+  .enum(["true", "false"])
+  .optional()
+  .transform((value) =>
+    value === undefined ? undefined : value === "true",
+  ),
+
+minPrice: z.coerce
+  .number()
+  .min(0, "Minimum price cannot be negative.")
+  .optional(),
 
     maxPrice: z.coerce
       .number()

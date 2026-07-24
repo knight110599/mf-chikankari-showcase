@@ -3,6 +3,7 @@ import {
   createProduct,
   deleteProduct,
   getFeaturedProducts,
+  getNewArrivalProducts,
   getProductById,
   getProductBySlug,
   getProducts,
@@ -16,6 +17,7 @@ interface ProductQuery {
   categoryId?: string;
   status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
   featured?: boolean;
+  newArrival?: boolean;
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
@@ -187,6 +189,19 @@ export const featured = async (
   res.status(200).json({
     success: true,
     message: "Featured products fetched successfully.",
+    data: products,
+  });
+};
+
+export const newArrivals = async (
+  _req: Request,
+  res: Response,
+): Promise<void> => {
+  const products = await getNewArrivalProducts();
+
+  res.status(200).json({
+    success: true,
+    message: "New arrival products fetched successfully.",
     data: products,
   });
 };

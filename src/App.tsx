@@ -22,6 +22,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminNewArrivalsPage from "./pages/admin/AdminNewArrivalsPage";
 
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import LoginPage from "./pages/auth/LoginPage";
@@ -89,6 +90,11 @@ function App() {
             path="products/:id/edit"
             element={<AdminEditProductPage />}
           />
+
+<Route
+  path="new-arrivals"
+  element={<AdminNewArrivalsPage />}
+/>
 
           <Route
             path="categories"

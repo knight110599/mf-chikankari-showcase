@@ -25,6 +25,11 @@ productRouter.get(
 );
 
 productRouter.get(
+  "/new-arrivals",
+  productController.newArrivals,
+);
+
+productRouter.get(
   "/slug/:slug",
   validate(productSlugSchema),
   productController.getBySlug,

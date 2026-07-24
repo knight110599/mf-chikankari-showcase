@@ -112,6 +112,7 @@ model Product {
   sizes                    String[]
   status                   ProductStatus @default(DRAFT)
   isFeatured               Boolean       @default(false)
+  isNewArrival             Boolean       @default(false)
   categoryId               String
   createdAt                DateTime      @default(now())
   updatedAt                DateTime      @updatedAt
@@ -122,6 +123,7 @@ model Product {
   @@index([categoryId])
   @@index([status])
   @@index([isFeatured])
+  @@index([isNewArrival])
   @@index([createdAt])
   @@index([price])
 }

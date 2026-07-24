@@ -12,6 +12,7 @@ interface GetProductsOptions {
   categoryId?: string;
   status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
   featured?: boolean;
+  newArrival?: boolean;
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
@@ -65,8 +66,9 @@ export async function createProduct(
       fabric: input.fabric || null,
       sizes: input.sizes,
       status: input.status ?? "DRAFT",
-      isFeatured: input.isFeatured ?? false,
-      categoryId: input.categoryId,
+isFeatured: input.isFeatured ?? false,
+isNewArrival: input.isNewArrival ?? false,
+categoryId: input.categoryId,
 
       images:
         input.images && input.images.length > 0
@@ -98,18 +100,19 @@ export async function getProducts(
   options: GetProductsOptions,
 ) {
   const {
-    page,
-    limit,
-    search,
-    categoryId,
-    status,
-    featured,
-    minPrice,
-    maxPrice,
-    inStock,
-    sortBy,
-    sortOrder,
-  } = options;
+  page,
+  limit,
+  search,
+  categoryId,
+  status,
+  featured,
+  newArrival,
+  minPrice,
+  maxPrice,
+  inStock,
+  sortBy,
+  sortOrder,
+} = options;
 
   const skip = (page - 1) * limit;
 
@@ -153,6 +156,10 @@ export async function getProducts(
 
     ...(featured !== undefined && {
       isFeatured: featured,
+    }),
+
+    ...(newArrival !== undefined && {
+      isNewArrival: newArrival,
     }),
 
     ...((minPrice !== undefined ||
@@ -449,6 +456,39 @@ export async function getFeaturedProducts() {
     },
 
     take: 12,
+
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+    },
+  });
+}
+export async function getNewArrivalProducts() {
+  return prisma.product.findMany({
+    where: {
+      status: "ACTIVE",
+      isNewArrival: true,
+      category: {
+        isActive: true,
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+
+    take: 8,
 
     include: {
       category: {
