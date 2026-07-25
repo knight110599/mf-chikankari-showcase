@@ -8,7 +8,6 @@ import {
   Package,
   Settings,
   ShoppingBag,
-  Sparkles,
   Users,
   X,
 } from "lucide-react";
@@ -24,11 +23,6 @@ const navItems = [
     label: "Products",
     to: "/admin/products",
     icon: Package,
-  },
-  {
-    label: "New Arrivals",
-    to: "/admin/new-arrivals",
-    icon: Sparkles,
   },
   {
     label: "Categories",

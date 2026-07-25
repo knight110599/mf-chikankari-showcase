@@ -29,6 +29,7 @@ export interface ApiProduct {
   sizes: string[];
   status: string;
   isFeatured: boolean;
+  isNewArrival: boolean;
   isActive?: boolean;
   categoryId: string;
   category: ApiProductCategory;
@@ -65,6 +66,7 @@ export interface GetProductsOptions {
   status?: string;
   featured?: boolean;
   isFeatured?: boolean;
+  isNewArrival?: boolean;
   sort?: string;
   order?: string;
   [key: string]: string | number | boolean | undefined;
@@ -89,6 +91,11 @@ export function getProducts(options: GetProductsOptions = {}) {
 export function getFeaturedProducts() {
   return getProducts({
     isFeatured: true,
+  });
+}
+export function getNewArrivalProducts() {
+  return getProducts({
+    isNewArrival: true,
   });
 }
 

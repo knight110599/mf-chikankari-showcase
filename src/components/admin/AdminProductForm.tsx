@@ -25,6 +25,7 @@ stock: z.coerce
 fabric: z.string().optional(),
 sizes: z.string().optional(),
 featured: z.boolean(),
+newArrival: z.boolean(),
 status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
 });
 
@@ -43,6 +44,7 @@ export interface ProductFormInitialValues {
   fabric: string;
   sizes: string;
   featured: boolean;
+  newArrival: boolean;
   status: "DRAFT" | "ACTIVE" | "ARCHIVED";
   image: string;
 }
@@ -84,6 +86,7 @@ const emptyValues: ProductFormInitialValues = {
   fabric: "",
   sizes: "",
   featured: false,
+  newArrival: false,
   status: "DRAFT",
   image: "",
 };
@@ -258,6 +261,7 @@ const uploadImage = async (
       .map((size) => size.trim())
       .filter(Boolean) || [],
   isFeatured: data.featured,
+  isNewArrival: data.newArrival,
   status: data.status,
   images: imageUrl
     ? [
@@ -607,30 +611,59 @@ const endpoint =
   )}
 </label>
 
-<div className="mt-6 grid gap-4 sm:grid-cols-2">
-            
+<div className="mt-6 grid gap-4 sm:grid-cols-3">
+  <label className="block">
+    <span className="text-sm font-semibold text-[#263D35]">
+      Product Status
+    </span>
 
-            <label className="block">
-  <span className="text-sm font-semibold text-[#263D35]">
-    Product Status
-  </span>
+    <select {...register("status")} className={inputClassName}>
+      <option value="DRAFT">Draft</option>
+      <option value="ACTIVE">Active</option>
+      <option value="ARCHIVED">Archived</option>
+    </select>
 
-  <select
-    {...register("status")}
-    className={inputClassName}
-  >
-    <option value="DRAFT">Draft</option>
-    <option value="ACTIVE">Active</option>
-    <option value="ARCHIVED">Archived</option>
-  </select>
+    {errors.status && (
+      <p className="mt-2 text-xs text-red-600">
+        {errors.status.message}
+      </p>
+    )}
+  </label>
 
-  {errors.status && (
-    <p className="mt-2 text-xs text-red-600">
-      {errors.status.message}
-    </p>
-  )}
-</label>
-          </div>
+  <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[#DDD2C0] bg-[#FCFAF7] px-4 py-4 sm:mt-7">
+    <input
+      type="checkbox"
+      {...register("featured")}
+      className="h-5 w-5 accent-[#0F4C3A]"
+    />
+
+    <div>
+      <p className="text-sm font-semibold text-[#263D35]">
+        Featured Product
+      </p>
+      <p className="mt-1 text-xs text-[#7B837E]">
+        Show this product in Featured Pieces.
+      </p>
+    </div>
+  </label>
+
+  <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-[#DDD2C0] bg-[#FCFAF7] px-4 py-4 sm:mt-7">
+    <input
+      type="checkbox"
+      {...register("newArrival")}
+      className="h-5 w-5 accent-[#0F4C3A]"
+    />
+
+    <div>
+      <p className="text-sm font-semibold text-[#263D35]">
+        New Arrival
+      </p>
+      <p className="mt-1 text-xs text-[#7B837E]">
+        Show this product in The Collection section.
+      </p>
+    </div>
+  </label>
+</div>
         </div>
 
         {submitError && (

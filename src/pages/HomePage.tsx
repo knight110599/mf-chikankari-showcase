@@ -4,7 +4,8 @@ import WhyChoose from "../sections/WhyChoose";
 import FeaturedCollections from "../sections/FeaturedCollections";
 import BrandStory from "../sections/BrandStory";
 import WholesaleProcess from "../sections/WholesaleProcess";
-import Gallery from "../sections/Gallery";
+import Gallery from "../sections/NewArrivals";
+import NewArrivals from "../sections/NewArrivals";
 
 function HomePage() {
   return (
@@ -25,7 +26,7 @@ function HomePage() {
 
       <WholesaleProcess />
 
-      <Gallery />
+      <NewArrivals />
     </>
   );
 }

@@ -43,6 +43,7 @@ function mapProductToFormValues(
     fabric: product.fabric ?? "",
     sizes: product.sizes.join(", "),
     featured: product.isFeatured,
+    newArrival: product.isNewArrival,
     status: product.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
     image: getPrimaryImageUrl(product),
   };

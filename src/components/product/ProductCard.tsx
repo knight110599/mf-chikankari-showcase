@@ -5,13 +5,19 @@ import type { ApiProduct } from "../../services/product.service";
 
 type ProductCardProps = {
   product: Product | ApiProduct;
+  showFeaturedBadge?: boolean;
+  showNewArrivalBadge?: boolean;
 };
 
 function isApiProduct(product: Product | ApiProduct): product is ApiProduct {
   return typeof product.category === "object";
 }
 
-function ProductCard({ product }: ProductCardProps) {
+function ProductCard({
+  product,
+  showFeaturedBadge = true,
+  showNewArrivalBadge = false,
+}: ProductCardProps) {
   const apiProduct = isApiProduct(product);
 
   const primaryImage = apiProduct
@@ -46,7 +52,10 @@ function ProductCard({ product }: ProductCardProps) {
       : "isFeatured" in product
         ? Boolean(product.isFeatured)
         : false;
-
+const isNewArrival =
+  "isNewArrival" in product
+    ? Boolean(product.isNewArrival)
+    : false;
   return (
     <article className="group relative transition-transform duration-500 hover:-translate-y-2">
       <Link
@@ -64,25 +73,33 @@ function ProductCard({ product }: ProductCardProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-90" />
 
           <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-            {isFeatured && (
-              <span
-                className="bg-white/90 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0F4C3A] backdrop-blur-sm"
-                style={{ fontFamily: "Poppins" }}
-              >
-                Featured
-              </span>
-            )}
+  {showFeaturedBadge && isFeatured && (
+    <span
+      className="bg-white/90 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#0F4C3A] backdrop-blur-sm"
+      style={{ fontFamily: "Poppins" }}
+    >
+      Featured
+    </span>
+  )}
 
-            {wholesalePrice && (
-              <span
-                className="bg-[#0F4C3A]/90 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-sm"
-                style={{ fontFamily: "Poppins" }}
-              >
-                Wholesale
-              </span>
-            )}
-          </div>
+  {showNewArrivalBadge && isNewArrival && (
+    <span
+      className="bg-[#C9A86A] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white shadow-lg"
+      style={{ fontFamily: "Poppins" }}
+    >
+      ✦ New Arrival
+    </span>
+  )}
 
+  {wholesalePrice && (
+    <span
+      className="bg-[#0F4C3A]/90 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-sm"
+      style={{ fontFamily: "Poppins" }}
+    >
+      Wholesale
+    </span>
+  )}
+</div>
           <div className="absolute bottom-4 right-4 flex h-12 w-12 translate-y-2 items-center justify-center rounded-full bg-white text-[#0F4C3A] opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
             <ArrowUpRight size={19} />
           </div>

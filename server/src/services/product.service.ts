@@ -389,7 +389,9 @@ export async function updateProduct(
         ...(input.isFeatured !== undefined && {
           isFeatured: input.isFeatured,
         }),
-
+...(input.isNewArrival !== undefined && {
+  isNewArrival: input.isNewArrival,
+}),
         ...(input.categoryId !== undefined && {
           categoryId: input.categoryId,
         }),
