@@ -8,10 +8,12 @@ import {
 import {
   LogOut,
   Menu,
+  ShoppingBag,
   UserRound,
   X,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 const navItems = [
   {
@@ -52,6 +54,8 @@ function Navbar() {
     logout,
   } = useAuth();
 
+  const { cartCount } = useCart();
+
   const isHomePage = location.pathname === "/";
   const isTransparent = isHomePage && !scrolled && !open;
 
@@ -87,12 +91,12 @@ function Navbar() {
 
   return (
     <nav
-  className={`sticky top-0 z-50 w-full transition-all duration-500 ${
-    isTransparent
-      ? "border-b border-transparent bg-[#F8F5F0]/80 backdrop-blur-md"
-      : "border-b border-[#E8DCC5] bg-[#F8F5F0]/95 shadow-[0_8px_30px_rgba(15,76,58,0.06)] backdrop-blur-xl"
-  }`}
->
+      className={`sticky top-0 z-50 w-full transition-all duration-500 ${
+        isTransparent
+          ? "border-b border-transparent bg-[#F8F5F0]/80 backdrop-blur-md"
+          : "border-b border-[#E8DCC5] bg-[#F8F5F0]/95 shadow-[0_8px_30px_rgba(15,76,58,0.06)] backdrop-blur-xl"
+      }`}
+    >
       <div
         className={`mx-auto flex w-full max-w-7xl items-center justify-between px-5 transition-all duration-500 sm:px-8 lg:px-12 ${
           scrolled || !isHomePage
@@ -204,6 +208,20 @@ function Navbar() {
             </>
           )}
 
+          <Link
+            to="/cart"
+            className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D9C8A8] bg-[#F8F5F0]/55 text-[#0F4C3A] backdrop-blur-md transition hover:border-[#0F4C3A] hover:bg-[#F8F5F0]"
+            aria-label={`Shopping cart with ${cartCount} items`}
+          >
+            <ShoppingBag className="h-5 w-5" />
+
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6A2435] px-1 text-[10px] font-bold leading-none text-white">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
+          </Link>
+
           <a
             href={whatsappUrl}
             target="_blank"
@@ -215,20 +233,37 @@ function Navbar() {
           </a>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((current) => !current)}
-          className="flex h-11 w-11 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB]/80 md:hidden"
-          aria-label={
-            open
-              ? "Close navigation menu"
-              : "Open navigation menu"
-          }
-          aria-expanded={open}
-          aria-controls="mobile-navigation"
-        >
-          {open ? <X size={26} /> : <Menu size={26} />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <Link
+            to="/cart"
+            onClick={closeMenu}
+            className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB]/80"
+            aria-label={`Shopping cart with ${cartCount} items`}
+          >
+            <ShoppingBag className="h-5 w-5" />
+
+            {cartCount > 0 && (
+              <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6A2435] px-1 text-[10px] font-bold leading-none text-white">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setOpen((current) => !current)}
+            className="flex h-11 w-11 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB]/80"
+            aria-label={
+              open
+                ? "Close navigation menu"
+                : "Open navigation menu"
+            }
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+          >
+            {open ? <X size={26} /> : <Menu size={26} />}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -258,6 +293,31 @@ function Navbar() {
                 </NavLink>
               </li>
             ))}
+
+            <li>
+              <NavLink
+                to="/cart"
+                onClick={closeMenu}
+                className={({ isActive }) =>
+                  `flex min-h-12 items-center justify-between border-b border-[#E8DCC5]/70 text-base transition-colors ${
+                    isActive
+                      ? "font-semibold text-[#0F4C3A]"
+                      : "text-[#555] hover:text-[#0F4C3A]"
+                  }`
+                }
+              >
+                <span className="inline-flex items-center gap-2">
+                  <ShoppingBag className="h-5 w-5" />
+                  Cart
+                </span>
+
+                {cartCount > 0 && (
+                  <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#6A2435] px-2 text-xs font-bold text-white">
+                    {cartCount}
+                  </span>
+                )}
+              </NavLink>
+            </li>
 
             <li className="mt-6 grid gap-3">
               {isAuthenticated ? (
