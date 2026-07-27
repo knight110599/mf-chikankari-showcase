@@ -6,20 +6,27 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Product } from "../data/products";
+import type { ApiProduct } from "../services/product.service";
 
-type CartItem = Product & {
+export type CartItem = ApiProduct & {
   quantity: number;
+  selectedSize: string;
 };
+
+type ProductId = ApiProduct["id"];
 
 type CartContextType = {
   cartItems: CartItem[];
   cartCount: number;
   subtotal: number;
-  addToCart: (product: Product, quantity?: number) => void;
-  increaseQuantity: (productId: number) => void;
-  decreaseQuantity: (productId: number) => void;
-  removeFromCart: (productId: number) => void;
+  addToCart: (
+    product: ApiProduct,
+    quantity?: number,
+    selectedSize?: string,
+  ) => void;
+  increaseQuantity: (productId: ProductId, selectedSize: string) => void;
+  decreaseQuantity: (productId: ProductId, selectedSize: string) => void;
+  removeFromCart: (productId: ProductId, selectedSize: string) => void;
   clearCart: () => void;
 };
 
@@ -36,7 +43,13 @@ export function CartProvider({ children }: CartProviderProps) {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
 
-      return savedCart ? JSON.parse(savedCart) : [];
+      if (!savedCart) {
+        return [];
+      }
+
+      const parsedCart: unknown = JSON.parse(savedCart);
+
+      return Array.isArray(parsedCart) ? parsedCart : [];
     } catch {
       return [];
     }
@@ -46,17 +59,26 @@ export function CartProvider({ children }: CartProviderProps) {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (product: Product, quantity = 1) => {
-    if (quantity < 1) return;
+  const addToCart = (
+    product: ApiProduct,
+    quantity = 1,
+    selectedSize = "",
+  ) => {
+    if (quantity < 1 || product.stock < 1) {
+      return;
+    }
 
     setCartItems((currentItems) => {
       const existingItem = currentItems.find(
-        (item) => item.id === product.id,
+        (item) =>
+          item.id === product.id &&
+          item.selectedSize === selectedSize,
       );
 
       if (existingItem) {
         return currentItems.map((item) =>
-          item.id === product.id
+          item.id === product.id &&
+          item.selectedSize === selectedSize
             ? {
                 ...item,
                 quantity: Math.min(
@@ -73,29 +95,41 @@ export function CartProvider({ children }: CartProviderProps) {
         {
           ...product,
           quantity: Math.min(quantity, product.stock),
+          selectedSize,
         },
       ];
     });
   };
 
-  const increaseQuantity = (productId: number) => {
+  const increaseQuantity = (
+    productId: ProductId,
+    selectedSize: string,
+  ) => {
     setCartItems((currentItems) =>
       currentItems.map((item) =>
-        item.id === productId
+        item.id === productId &&
+        item.selectedSize === selectedSize
           ? {
               ...item,
-              quantity: Math.min(item.quantity + 1, item.stock),
+              quantity: Math.min(
+                item.quantity + 1,
+                item.stock,
+              ),
             }
           : item,
       ),
     );
   };
 
-  const decreaseQuantity = (productId: number) => {
+  const decreaseQuantity = (
+    productId: ProductId,
+    selectedSize: string,
+  ) => {
     setCartItems((currentItems) =>
       currentItems
         .map((item) =>
-          item.id === productId
+          item.id === productId &&
+          item.selectedSize === selectedSize
             ? {
                 ...item,
                 quantity: item.quantity - 1,
@@ -106,9 +140,18 @@ export function CartProvider({ children }: CartProviderProps) {
     );
   };
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (
+    productId: ProductId,
+    selectedSize: string,
+  ) => {
     setCartItems((currentItems) =>
-      currentItems.filter((item) => item.id !== productId),
+      currentItems.filter(
+        (item) =>
+          !(
+            item.id === productId &&
+            item.selectedSize === selectedSize
+          ),
+      ),
     );
   };
 
@@ -128,7 +171,8 @@ export function CartProvider({ children }: CartProviderProps) {
   const subtotal = useMemo(
     () =>
       cartItems.reduce(
-        (total, item) => total + item.price * item.quantity,
+        (total, item) =>
+          total + Number(item.price) * item.quantity,
         0,
       ),
     [cartItems],
@@ -159,7 +203,9 @@ export function useCart() {
   const context = useContext(CartContext);
 
   if (!context) {
-    throw new Error("useCart must be used inside CartProvider.");
+    throw new Error(
+      "useCart must be used inside CartProvider.",
+    );
   }
 
   return context;

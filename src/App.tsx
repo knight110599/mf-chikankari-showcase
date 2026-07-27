@@ -7,6 +7,8 @@ import AdminLayout from "./layouts/AdminLayout";
 import MainLayout from "./layouts/MainLayout";
 
 import AboutPage from "./pages/AboutPage";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import CategoryProductsPage from "./pages/CategoryProductsPage";
 import ContactPage from "./pages/ContactPage";
@@ -49,6 +51,8 @@ function App() {
           element={<CategoryProductsPage />}
         />
 
+        <Route path="cart" element={<CartPage />} />
+
         <Route path="login" element={<LoginPage />} />
         <Route path="signup" element={<SignupPage />} />
         <Route
@@ -58,6 +62,10 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="account" element={<AccountPage />} />
+          <Route
+            path="checkout"
+            element={<CheckoutPage />}
+          />
         </Route>
       </Route>
 
@@ -89,7 +97,6 @@ function App() {
             path="products/:id/edit"
             element={<AdminEditProductPage />}
           />
-
 
           <Route
             path="categories"
