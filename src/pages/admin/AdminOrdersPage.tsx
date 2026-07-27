@@ -1,12 +1,16 @@
 import {
   AlertCircle,
   CalendarDays,
+  CheckCircle2,
   PackageCheck,
+  RefreshCw,
+  Save,
   Search,
   ShoppingBag,
   UserRound,
 } from "lucide-react";
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -14,6 +18,7 @@ import {
 
 import {
   getAdminOrders,
+  updateAdminOrderStatus,
   type AdminOrder,
   type OrderSource,
   type OrderStatus,
@@ -60,6 +65,11 @@ const SOURCE_OPTIONS: Array<{
   { value: "WHATSAPP", label: "WhatsApp" },
   { value: "ADMIN", label: "Admin" },
 ];
+
+type OrderDraft = {
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+};
 
 function formatLabel(value: string) {
   return value
@@ -131,6 +141,9 @@ function getPaymentStatusClasses(
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [drafts, setDrafts] = useState<
+    Record<string, OrderDraft>
+  >({});
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<"all" | OrderStatus>("all");
@@ -139,33 +152,134 @@ export default function AdminOrdersPage() {
   const [selectedSource, setSelectedSource] =
     useState<"all" | OrderSource>("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [savingOrderId, setSavingOrderId] = useState<
+    string | null
+  >(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const loadOrders = useCallback(async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      const response = await getAdminOrders({
+        limit: 100,
+        sortOrder: "desc",
+      });
+
+      setOrders(response.data);
+
+      setDrafts(
+        Object.fromEntries(
+          response.data.map((order) => [
+            order.id,
+            {
+              status: order.status,
+              paymentStatus: order.paymentStatus,
+            },
+          ]),
+        ),
+      );
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to load orders.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const loadOrders = async () => {
-      setIsLoading(true);
-      setErrorMessage("");
-
-      try {
-        const response = await getAdminOrders({
-          limit: 100,
-          sortOrder: "desc",
-        });
-
-        setOrders(response.data);
-      } catch (error) {
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Unable to load orders.",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     void loadOrders();
-  }, []);
+  }, [loadOrders]);
+
+  const handleDraftChange = (
+    orderId: string,
+    field: keyof OrderDraft,
+    value: OrderStatus | PaymentStatus,
+  ) => {
+    setDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [orderId]: {
+        ...currentDrafts[orderId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSave = async (order: AdminOrder) => {
+    const draft = drafts[order.id];
+
+    if (!draft) {
+      return;
+    }
+
+    const statusChanged =
+      draft.status !== order.status;
+    const paymentStatusChanged =
+      draft.paymentStatus !== order.paymentStatus;
+
+    if (!statusChanged && !paymentStatusChanged) {
+      setSuccessMessage("No changes to save.");
+      return;
+    }
+
+    try {
+      setSavingOrderId(order.id);
+      setErrorMessage("");
+      setSuccessMessage("");
+
+      const response = await updateAdminOrderStatus(
+        order.id,
+        {
+          ...(statusChanged
+            ? { status: draft.status }
+            : {}),
+          ...(paymentStatusChanged
+            ? {
+                paymentStatus:
+                  draft.paymentStatus,
+              }
+            : {}),
+        },
+      );
+
+      setOrders((currentOrders) =>
+        currentOrders.map((currentOrder) =>
+          currentOrder.id === order.id
+            ? {
+                ...currentOrder,
+                ...response.data,
+              }
+            : currentOrder,
+        ),
+      );
+
+      setDrafts((currentDrafts) => ({
+        ...currentDrafts,
+        [order.id]: {
+          status: response.data.status,
+          paymentStatus:
+            response.data.paymentStatus,
+        },
+      }));
+
+      setSuccessMessage(
+        `${order.orderNumber} updated successfully.`,
+      );
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to update order.",
+      );
+    } finally {
+      setSavingOrderId(null);
+    }
+  };
 
   const filteredOrders = useMemo(() => {
     const normalizedSearch =
@@ -235,25 +349,47 @@ export default function AdminOrdersPage() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#B38E49]">
-          Order Management
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#B38E49]">
+            Order Management
+          </p>
 
-        <h1 className="mt-2 font-serif text-4xl text-[#0F4C3A]">
-          Orders
-        </h1>
+          <h1 className="mt-2 font-serif text-4xl text-[#0F4C3A]">
+            Orders
+          </h1>
 
-        <p className="mt-3 text-sm leading-6 text-[#6D746F]">
-          Review customer orders, payment state and
-          fulfilment progress.
-        </p>
+          <p className="mt-3 text-sm leading-6 text-[#6D746F]">
+            Review customer orders, payment state and
+            fulfilment progress.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void loadOrders()}
+          disabled={isLoading}
+          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#DDD2C0] bg-white px-4 py-3 text-sm font-semibold text-[#0F4C3A] shadow-sm transition hover:bg-[#FCFAF7] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <RefreshCw
+            size={17}
+            className={isLoading ? "animate-spin" : ""}
+          />
+          Refresh
+        </button>
       </div>
 
       {errorMessage && (
         <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
           <AlertCircle size={19} />
           {errorMessage}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700">
+          <CheckCircle2 size={19} />
+          {successMessage}
         </div>
       )}
 
@@ -428,7 +564,7 @@ export default function AdminOrdersPage() {
 
       <div className="overflow-hidden rounded-[24px] border border-[#E2D8C7] bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1120px] border-collapse">
+          <table className="w-full min-w-[1420px] border-collapse">
             <thead className="bg-[#F8F5F0]">
               <tr className="border-b border-[#E2D8C7] text-left">
                 <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
@@ -441,16 +577,22 @@ export default function AdminOrdersPage() {
                   Total
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
-                  Order Status
+                  Current Status
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
-                  Payment
+                  Update Order Status
+                </th>
+                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
+                  Update Payment
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
                   Source
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
                   Date
+                </th>
+                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
+                  Action
                 </th>
               </tr>
             </thead>
@@ -459,7 +601,7 @@ export default function AdminOrdersPage() {
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={9}
                     className="px-6 py-14 text-center text-sm text-[#7B837E]"
                   >
                     Loading orders...
@@ -468,7 +610,7 @@ export default function AdminOrdersPage() {
               ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={9}
                     className="px-6 py-14 text-center"
                   >
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EFE8DB] text-[#0F4C3A]">
@@ -485,82 +627,180 @@ export default function AdminOrdersPage() {
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className="transition hover:bg-[#FCFAF7]"
-                  >
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-semibold text-[#0F4C3A]">
-                        {order.orderNumber}
-                      </p>
-                      <p className="mt-1 text-xs text-[#8A918D]">
-                        {order.items?.length
-                          ? `${order.items.length} line item${
-                              order.items.length === 1
-                                ? ""
-                                : "s"
-                            }`
-                          : "Order received"}
-                      </p>
-                    </td>
+                filteredOrders.map((order) => {
+                  const draft = drafts[order.id] ?? {
+                    status: order.status,
+                    paymentStatus:
+                      order.paymentStatus,
+                  };
 
-                    <td className="px-6 py-4">
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EEF3F0] text-[#0F4C3A]">
-                          <UserRound size={17} />
+                  const hasChanges =
+                    draft.status !== order.status ||
+                    draft.paymentStatus !==
+                      order.paymentStatus;
+
+                  return (
+                    <tr
+                      key={order.id}
+                      className="transition hover:bg-[#FCFAF7]"
+                    >
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-semibold text-[#0F4C3A]">
+                          {order.orderNumber}
+                        </p>
+                        <p className="mt-1 text-xs text-[#8A918D]">
+                          {order.items?.length
+                            ? `${order.items.length} line item${
+                                order.items.length === 1
+                                  ? ""
+                                  : "s"
+                              }`
+                            : "Order received"}
+                        </p>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#EEF3F0] text-[#0F4C3A]">
+                            <UserRound size={17} />
+                          </div>
+
+                          <div>
+                            <p className="text-sm font-semibold text-[#263D35]">
+                              {order.customerFirstName}{" "}
+                              {order.customerLastName}
+                            </p>
+                            <p className="mt-1 text-xs text-[#8A918D]">
+                              {order.customerPhone}
+                            </p>
+                            <p className="mt-1 text-xs text-[#8A918D]">
+                              {order.customerEmail}
+                            </p>
+                          </div>
                         </div>
+                      </td>
 
-                        <div>
-                          <p className="text-sm font-semibold text-[#263D35]">
-                            {order.customerFirstName}{" "}
-                            {order.customerLastName}
-                          </p>
-                          <p className="mt-1 text-xs text-[#8A918D]">
-                            {order.customerPhone}
-                          </p>
-                          <p className="mt-1 text-xs text-[#8A918D]">
-                            {order.customerEmail}
-                          </p>
+                      <td className="px-6 py-4 text-sm font-semibold text-[#0F4C3A]">
+                        {formatCurrency(order.total)}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="space-y-2">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClasses(
+                              order.status,
+                            )}`}
+                          >
+                            {formatLabel(order.status)}
+                          </span>
+
+                          <div>
+                            <span
+                              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getPaymentStatusClasses(
+                                order.paymentStatus,
+                              )}`}
+                            >
+                              {formatLabel(
+                                order.paymentStatus,
+                              )}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-6 py-4 text-sm font-semibold text-[#0F4C3A]">
-                      {formatCurrency(order.total)}
-                    </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={draft.status}
+                          onChange={(event) =>
+                            handleDraftChange(
+                              order.id,
+                              "status",
+                              event.target
+                                .value as OrderStatus,
+                            )
+                          }
+                          className="w-48 rounded-xl border border-[#DDD2C0] bg-white px-3 py-2.5 text-sm text-[#263D35] outline-none transition focus:border-[#B38E49] focus:ring-2 focus:ring-[#B38E49]/15"
+                        >
+                          {ORDER_STATUS_OPTIONS.filter(
+                            (option) =>
+                              option.value !== "all",
+                          ).map((option) => (
+                            <option
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getOrderStatusClasses(
-                          order.status,
-                        )}`}
-                      >
-                        {formatLabel(order.status)}
-                      </span>
-                    </td>
+                      <td className="px-6 py-4">
+                        <select
+                          value={draft.paymentStatus}
+                          onChange={(event) =>
+                            handleDraftChange(
+                              order.id,
+                              "paymentStatus",
+                              event.target
+                                .value as PaymentStatus,
+                            )
+                          }
+                          className="w-44 rounded-xl border border-[#DDD2C0] bg-white px-3 py-2.5 text-sm text-[#263D35] outline-none transition focus:border-[#B38E49] focus:ring-2 focus:ring-[#B38E49]/15"
+                        >
+                          {PAYMENT_STATUS_OPTIONS.filter(
+                            (option) =>
+                              option.value !== "all",
+                          ).map((option) => (
+                            <option
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${getPaymentStatusClasses(
-                          order.paymentStatus,
-                        )}`}
-                      >
-                        {formatLabel(
-                          order.paymentStatus,
-                        )}
-                      </span>
-                    </td>
+                      <td className="px-6 py-4 text-sm text-[#5E6964]">
+                        {formatLabel(order.source)}
+                      </td>
 
-                    <td className="px-6 py-4 text-sm text-[#5E6964]">
-                      {formatLabel(order.source)}
-                    </td>
+                      <td className="px-6 py-4 text-sm text-[#5E6964]">
+                        {formatDate(order.createdAt)}
+                      </td>
 
-                    <td className="px-6 py-4 text-sm text-[#5E6964]">
-                      {formatDate(order.createdAt)}
-                    </td>
-                  </tr>
-                ))
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            disabled={
+                              !hasChanges ||
+                              savingOrderId === order.id
+                            }
+                            onClick={() =>
+                              void handleSave(order)
+                            }
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F4C3A] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0B3B2F] disabled:cursor-not-allowed disabled:opacity-45"
+                          >
+                            {savingOrderId === order.id ? (
+                              <RefreshCw
+                                size={16}
+                                className="animate-spin"
+                              />
+                            ) : (
+                              <Save size={16} />
+                            )}
+
+                            {savingOrderId === order.id
+                              ? "Saving..."
+                              : "Save"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

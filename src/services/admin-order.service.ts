@@ -24,13 +24,13 @@ export interface AdminOrderItem {
   id: string;
   productId: string | null;
   productName: string;
-  productSku: string;
-  productSlug: string | null;
-  productImage: string | null;
-  selectedSize: string | null;
+  productSku?: string | null;
+  productSlug?: string | null;
+  productImage?: string | null;
+  selectedSize?: string | null;
   quantity: number;
-  unitPrice: string;
-  lineTotal: string;
+  unitPrice: string | number;
+  lineTotal: string | number;
 }
 
 export interface AdminOrder {
@@ -48,9 +48,9 @@ export interface AdminOrder {
   postalCode: string;
   country: string;
   orderNotes: string | null;
-  subtotal: string;
-  deliveryCharge: string;
-  total: string;
+  subtotal: string | number;
+  deliveryCharge: string | number;
+  total: string | number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   source: OrderSource;
@@ -77,6 +77,12 @@ export interface AdminOrdersResponse {
   pagination: OrdersPagination;
 }
 
+export interface AdminOrderResponse {
+  success: boolean;
+  message: string;
+  data: AdminOrder;
+}
+
 export interface GetAdminOrdersOptions {
   page?: number;
   limit?: number;
@@ -85,6 +91,11 @@ export interface GetAdminOrdersOptions {
   paymentStatus?: PaymentStatus;
   source?: OrderSource;
   sortOrder?: "asc" | "desc";
+}
+
+export interface UpdateAdminOrderStatusInput {
+  status?: OrderStatus;
+  paymentStatus?: PaymentStatus;
 }
 
 function getAdminAccessToken() {
@@ -123,6 +134,24 @@ export function getAdminOrders(
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+    },
+  );
+}
+
+export function updateAdminOrderStatus(
+  orderId: string,
+  input: UpdateAdminOrderStatusInput,
+) {
+  const accessToken = getAdminAccessToken();
+
+  return apiRequest<AdminOrderResponse>(
+    `/orders/${orderId}/status`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(input),
     },
   );
 }
