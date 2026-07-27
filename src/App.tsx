@@ -23,6 +23,7 @@ import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
@@ -101,6 +102,11 @@ function App() {
           <Route
             path="categories"
             element={<AdminCategoriesPage />}
+          />
+
+          <Route
+            path="orders"
+            element={<AdminOrdersPage />}
           />
         </Route>
       </Route>
