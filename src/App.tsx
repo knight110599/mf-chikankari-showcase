@@ -25,6 +25,7 @@ import AdminEditProductPage from "./pages/admin/AdminEditProductPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
 
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import LoginPage from "./pages/auth/LoginPage";
@@ -103,6 +104,11 @@ function App() {
             path="categories"
             element={<AdminCategoriesPage />}
           />
+
+<Route
+  path="inventory"
+  element={<AdminInventoryPage />}
+/>
 
           <Route
             path="orders"

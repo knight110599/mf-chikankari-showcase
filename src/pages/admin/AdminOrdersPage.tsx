@@ -2,6 +2,7 @@ import {
   AlertCircle,
   CalendarDays,
   CheckCircle2,
+  Eye,
   PackageCheck,
   RefreshCw,
   Save,
@@ -24,6 +25,7 @@ import {
   type OrderStatus,
   type PaymentStatus,
 } from "../../services/admin-order.service";
+import OrderDetailsModal from "../../components/admin/orders/OrderDetailsModal";
 
 const ORDER_STATUS_OPTIONS: Array<{
   value: "all" | OrderStatus;
@@ -157,6 +159,9 @@ export default function AdminOrdersPage() {
   >(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [selectedOrderId, setSelectedOrderId] = useState<
+    string | null
+  >(null);
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -591,7 +596,7 @@ export default function AdminOrdersPage() {
                 <th className="px-6 py-4 text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
                   Date
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E]">
+                <th className="sticky right-0 z-20 bg-[#F8F5F0] px-6 py-4 text-right text-xs font-semibold uppercase tracking-[0.16em] text-[#7B837E] shadow-[-8px_0_12px_-12px_rgba(15,76,58,0.35)]">
                   Action
                 </th>
               </tr>
@@ -642,7 +647,7 @@ export default function AdminOrdersPage() {
                   return (
                     <tr
                       key={order.id}
-                      className="transition hover:bg-[#FCFAF7]"
+                      className="group transition hover:bg-[#FCFAF7]"
                     >
                       <td className="px-6 py-4">
                         <p className="text-sm font-semibold text-[#0F4C3A]">
@@ -770,8 +775,19 @@ export default function AdminOrdersPage() {
                         {formatDate(order.createdAt)}
                       </td>
 
-                      <td className="px-6 py-4">
-                        <div className="flex justify-end">
+                      <td className="sticky right-0 z-10 bg-white px-6 py-4 shadow-[-8px_0_12px_-12px_rgba(15,76,58,0.35)] transition-colors group-hover:bg-[#FCFAF7]">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedOrderId(order.id)
+                            }
+                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#DDD2C0] bg-white px-4 py-2.5 text-sm font-semibold text-[#0F4C3A] transition hover:bg-[#F8F5F0]"
+                          >
+                            <Eye size={16} />
+                            View
+                          </button>
+
                           <button
                             type="button"
                             disabled={
@@ -806,6 +822,11 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       </div>
+      <OrderDetailsModal
+        orderId={selectedOrderId}
+        isOpen={selectedOrderId !== null}
+        onClose={() => setSelectedOrderId(null)}
+      />
     </section>
   );
 }

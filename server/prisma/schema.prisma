@@ -51,6 +51,19 @@ enum OrderSource {
   ADMIN
 }
 
+enum StockMovementType {
+  INITIAL_STOCK
+  RESTOCK
+  ORDER_DEDUCTION
+  ORDER_RESTORATION
+  MANUAL_INCREASE
+  MANUAL_DECREASE
+  CUSTOMER_RETURN
+  DAMAGED
+  LOST
+  CORRECTION
+}
+
 model User {
   id                  String               @id @default(cuid())
   firstName           String
@@ -69,6 +82,8 @@ model User {
   refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
   orders              Order[]
+
+  stockMovementsCreated StockMovement[] @relation("StockMovementCreatedBy")
 
   @@index([email])
   @@index([role])
@@ -122,28 +137,36 @@ model Category {
 }
 
 model Product {
-  id                       String        @id @default(cuid())
-  name                     String
-  slug                     String        @unique
-  sku                      String        @unique
-  shortDescription         String?
-  description              String?
-  price                    Decimal       @db.Decimal(10, 2)
-  wholesalePrice           Decimal?      @db.Decimal(10, 2)
-  stock                    Int           @default(0)
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  sku              String   @unique
+  shortDescription String?
+  description      String?
+  price            Decimal  @db.Decimal(10, 2)
+  wholesalePrice   Decimal? @db.Decimal(10, 2)
+
+  // Legacy aggregate stock retained temporarily for compatibility.
+  stock Int @default(0)
+
   minimumWholesaleQuantity Int?
   fabric                   String?
-  sizes                    String[]
-  status                   ProductStatus @default(DRAFT)
-  isFeatured               Boolean       @default(false)
-  isNewArrival             Boolean       @default(false)
-  categoryId               String
-  createdAt                DateTime      @default(now())
-  updatedAt                DateTime      @updatedAt
 
-  category   Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  images     ProductImage[]
-  orderItems OrderItem[]
+  // Legacy sizes array retained temporarily for compatibility.
+  sizes String[]
+
+  status       ProductStatus @default(DRAFT)
+  isFeatured   Boolean       @default(false)
+  isNewArrival Boolean       @default(false)
+  categoryId   String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  category       Category         @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images         ProductImage[]
+  variants       ProductVariant[]
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
 
   @@index([categoryId])
   @@index([status])
@@ -166,6 +189,42 @@ model ProductImage {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
+  @@index([productId, sortOrder])
+}
+
+model ProductVariant {
+  id        String @id @default(cuid())
+  productId String
+
+  size    String
+  sku     String  @unique
+  barcode String? @unique
+
+  stock         Int @default(0)
+  reservedStock Int @default(0)
+
+  lowStockThreshold Int @default(5)
+
+  costPrice   Decimal? @db.Decimal(10, 2)
+  weightGrams Int?
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
+
+  @@unique([productId, size])
+  @@index([productId])
+  @@index([size])
+  @@index([stock])
+  @@index([isActive])
+  @@index([productId, isActive])
   @@index([productId, sortOrder])
 }
 
@@ -204,8 +263,9 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items OrderItem[]
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items          OrderItem[]
+  stockMovements StockMovement[]
 
   @@index([userId])
   @@index([orderNumber])
@@ -221,6 +281,7 @@ model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
   productId String?
+  variantId String?
 
   productName  String
   productSku   String
@@ -232,13 +293,67 @@ model OrderItem {
   unitPrice Decimal @db.Decimal(10, 2)
   lineTotal Decimal @db.Decimal(10, 2)
 
+  inventoryDeductedAt DateTime?
+  inventoryRestoredAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant        ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  stockMovements StockMovement[]
 
   @@index([orderId])
   @@index([productId])
+  @@index([variantId])
   @@index([productSku])
+  @@index([inventoryDeductedAt])
+  @@index([inventoryRestoredAt])
+}
+
+model StockMovement {
+  id String @id @default(cuid())
+
+  productId   String?
+  variantId   String?
+  orderId     String?
+  orderItemId String?
+  createdById String?
+
+  type StockMovementType
+
+  // Signed stock change:
+  // positive values add stock, negative values deduct stock.
+  quantity Int
+
+  previousStock Int
+  newStock      Int
+
+  productNameSnapshot String
+  productSkuSnapshot  String
+  variantSizeSnapshot String?
+  variantSkuSnapshot  String?
+
+  reference String?
+  note      String?
+
+  createdAt DateTime @default(now())
+
+  product   Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  order     Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderItem OrderItem?      @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+
+  createdBy User? @relation("StockMovementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([variantId])
+  @@index([orderId])
+  @@index([orderItemId])
+  @@index([createdById])
+  @@index([type])
+  @@index([createdAt])
+  @@index([variantId, createdAt])
+  @@index([productId, createdAt])
 }
