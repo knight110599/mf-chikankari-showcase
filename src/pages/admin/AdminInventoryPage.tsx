@@ -30,6 +30,7 @@ import {
 import RestockInventoryModal from "../../components/admin/inventory/RestockInventoryModal";
 import AddInventoryVariantModal from "../../components/admin/inventory/AddInventoryVariantModal";
 import AdjustInventoryStockModal from "../../components/admin/inventory/AdjustInventoryStockModal";
+import InventoryHistoryModal from "../../components/admin/inventory/InventoryHistoryModal";
 
 type InventoryFilter =
   | "all"
@@ -135,6 +136,15 @@ export default function AdminInventoryPage() {
   const [adjustVariant, setAdjustVariant] =
   useState<InventoryVariant | null>(null);
 
+const [isHistoryModalOpen, setIsHistoryModalOpen] =
+  useState(false);
+
+const [selectedHistoryVariant, setSelectedHistoryVariant] =
+  useState<InventoryVariant | null>(null);
+
+const [selectedHistoryProductId, setSelectedHistoryProductId] =
+  useState<string | null>(null);
+  
   const loadInventory = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage("");
@@ -171,8 +181,14 @@ export default function AdminInventoryPage() {
   }, [page, searchTerm, selectedFilter]);
 
   useEffect(() => {
+  const timeoutId = window.setTimeout(() => {
     void loadInventory();
-  }, [loadInventory]);
+  }, 0);
+
+  return () => {
+    window.clearTimeout(timeoutId);
+  };
+}, [loadInventory]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -309,6 +325,13 @@ const handlePendingAction = (
   action: string,
   variant: InventoryVariant,
 ) => {
+  if (action === "Inventory history") {
+    setSelectedHistoryVariant(variant);
+    setSelectedHistoryProductId(variant.productId);
+    setIsHistoryModalOpen(true);
+    return;
+  }
+
   setErrorMessage("");
   setSuccessMessage(
     `${action} modal for ${variant.sku} will be connected in the next step.`,
@@ -822,10 +845,14 @@ return (
 
                                           return (
                                             <tr
-                                              key={
-                                                variant.id
-                                              }
-                                              className="transition hover:bg-[#FCFAF7]"
+  key={variant.id}
+  className={`transition hover:bg-[#FCFAF7] ${
+    variant.stock <= 0
+      ? "bg-red-50/70"
+      : variant.stock <= variant.lowStockThreshold
+        ? "bg-amber-50/70"
+        : ""
+  }`}
                                             >
                                               <td className="px-5 py-4">
                                                 <div className="flex items-center gap-2">
@@ -1028,6 +1055,16 @@ return (
   variant={adjustVariant}
   onClose={() => setAdjustVariant(null)}
   onSuccess={handleAdjustSuccess}
+/>
+<InventoryHistoryModal
+  isOpen={isHistoryModalOpen}
+  productId={selectedHistoryProductId}
+  variant={selectedHistoryVariant}
+  onClose={() => {
+    setIsHistoryModalOpen(false);
+    setSelectedHistoryVariant(null);
+    setSelectedHistoryProductId(null);
+  }}
 />
 </section>
 );
