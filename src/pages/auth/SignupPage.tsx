@@ -10,26 +10,36 @@ import {
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+
 import AuthInput from "../../components/auth/AuthInput";
 import AuthLayout from "../../components/auth/AuthLayout";
 import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
+import { useAuth } from "../../context/useAuth";
 import {
   signupSchema,
   type SignupFormValues,
 } from "../../schemas/authSchemas";
 
 export default function SignupPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [serverError, setServerError] = useState("");
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword,
+  ] = useState(false);
+
+  const [serverError, setServerError] =
+    useState("");
 
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({
+  } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       firstName: "",
@@ -42,24 +52,30 @@ export default function SignupPage() {
     },
   });
 
-  const onSubmit = async (values: SignupFormValues) => {
+  const onSubmit = async (
+    values: SignupFormValues,
+  ) => {
     setServerError("");
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await signup({
+  firstName: values.firstName.trim(),
+  lastName: values.lastName.trim(),
+  email: values.email.trim().toLowerCase(),
+  phone: values.phone.trim(),
+  password: values.password,
+  confirmPassword: values.confirmPassword,
+  acceptTerms: values.acceptTerms,
+});
 
-      console.log("Signup values:", values);
-
-      navigate("/login", {
+      navigate("/account", {
         replace: true,
-        state: {
-          message:
-            "Your account has been created. Please sign in to continue.",
-        },
       });
-    } catch {
+    } catch (error) {
       setServerError(
-        "Your account could not be created. Please try again shortly.",
+        error instanceof Error
+          ? error.message
+          : "Your account could not be created. Please try again shortly.",
       );
     }
   };
@@ -90,7 +106,9 @@ export default function SignupPage() {
             type="text"
             autoComplete="given-name"
             placeholder="Akash"
-            icon={<UserRound className="h-4 w-4" />}
+            icon={
+              <UserRound className="h-4 w-4" />
+            }
             error={errors.firstName?.message}
             {...register("firstName")}
           />
@@ -100,7 +118,9 @@ export default function SignupPage() {
             type="text"
             autoComplete="family-name"
             placeholder="Verma"
-            icon={<UserRound className="h-4 w-4" />}
+            icon={
+              <UserRound className="h-4 w-4" />
+            }
             error={errors.lastName?.message}
             {...register("lastName")}
           />
@@ -130,17 +150,31 @@ export default function SignupPage() {
 
         <AuthInput
           label="Password"
-          type={showPassword ? "text" : "password"}
+          type={
+            showPassword
+              ? "text"
+              : "password"
+          }
           autoComplete="new-password"
           placeholder="Create a secure password"
-          icon={<LockKeyhole className="h-4 w-4" />}
+          icon={
+            <LockKeyhole className="h-4 w-4" />
+          }
           error={errors.password?.message}
           rightElement={
             <button
               type="button"
-              onClick={() => setShowPassword((current) => !current)}
+              onClick={() =>
+                setShowPassword(
+                  (current) => !current,
+                )
+              }
               className="text-[#7C8A84] transition hover:text-[#0F4C3A]"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={
+                showPassword
+                  ? "Hide password"
+                  : "Show password"
+              }
             >
               {showPassword ? (
                 <EyeOff className="h-4 w-4" />
@@ -154,16 +188,24 @@ export default function SignupPage() {
 
         <AuthInput
           label="Confirm password"
-          type={showConfirmPassword ? "text" : "password"}
+          type={
+            showConfirmPassword
+              ? "text"
+              : "password"
+          }
           autoComplete="new-password"
           placeholder="Enter your password again"
-          icon={<LockKeyhole className="h-4 w-4" />}
+          icon={
+            <LockKeyhole className="h-4 w-4" />
+          }
           error={errors.confirmPassword?.message}
           rightElement={
             <button
               type="button"
               onClick={() =>
-                setShowConfirmPassword((current) => !current)
+                setShowConfirmPassword(
+                  (current) => !current,
+                )
               }
               className="text-[#7C8A84] transition hover:text-[#0F4C3A]"
               aria-label={

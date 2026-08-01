@@ -32,15 +32,45 @@ function getBearerToken(
   return token || null;
 }
 
+function getAccessToken(req: Request): string | null {
+  const bearerToken = getBearerToken(
+    req.headers.authorization,
+  );
+
+  if (bearerToken) {
+    return bearerToken;
+  }
+
+  const cookieToken =
+    req.cookies?.accessToken;
+
+  return typeof cookieToken === "string"
+    ? cookieToken
+    : null;
+}
+
+async function getAuthenticatedUser(token: string) {
+  const payload = verifyAccessToken(token);
+
+  return prisma.user.findUnique({
+    where: {
+      id: payload.userId,
+    },
+    select: {
+      id: true,
+      role: true,
+      status: true,
+    },
+  });
+}
+
 export const protect = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const token = getBearerToken(
-      req.headers.authorization,
-    );
+    const token = getAccessToken(req);
 
     if (!token) {
       res.status(401).json({
@@ -50,18 +80,7 @@ export const protect = async (
       return;
     }
 
-    const payload = verifyAccessToken(token);
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: payload.userId,
-      },
-      select: {
-        id: true,
-        role: true,
-        status: true,
-      },
-    });
+    const user = await getAuthenticatedUser(token);
 
     if (!user || user.status !== "ACTIVE") {
       res.status(401).json({
@@ -90,9 +109,7 @@ export const optionalProtect = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  const token = getBearerToken(
-    req.headers.authorization,
-  );
+  const token = getAccessToken(req);
 
   if (!token) {
     next();
@@ -100,18 +117,7 @@ export const optionalProtect = async (
   }
 
   try {
-    const payload = verifyAccessToken(token);
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: payload.userId,
-      },
-      select: {
-        id: true,
-        role: true,
-        status: true,
-      },
-    });
+    const user = await getAuthenticatedUser(token);
 
     if (!user || user.status !== "ACTIVE") {
       res.status(401).json({

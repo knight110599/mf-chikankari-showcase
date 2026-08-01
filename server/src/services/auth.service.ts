@@ -47,9 +47,12 @@ interface LoginInput {
 const PASSWORD_SALT_ROUNDS = 12;
 
 export async function registerUser(input: RegisterInput) {
+  const email = input.email.trim().toLowerCase();
+  const phone = input.phone?.trim() || null;
+
   const existingUser = await prisma.user.findUnique({
     where: {
-      email: input.email,
+      email,
     },
     select: {
       id: true,
@@ -60,10 +63,10 @@ export async function registerUser(input: RegisterInput) {
     throw new Error("EMAIL_ALREADY_EXISTS");
   }
 
-  if (input.phone) {
+  if (phone) {
     const existingPhone = await prisma.user.findUnique({
       where: {
-        phone: input.phone,
+        phone,
       },
       select: {
         id: true,
@@ -82,10 +85,10 @@ export async function registerUser(input: RegisterInput) {
 
   return prisma.user.create({
     data: {
-      firstName: input.firstName,
-      lastName: input.lastName,
-      email: input.email,
-      phone: input.phone || null,
+      firstName: input.firstName.trim(),
+      lastName: input.lastName.trim(),
+      email,
+      phone,
       passwordHash,
     },
     select: {
@@ -101,10 +104,13 @@ export async function registerUser(input: RegisterInput) {
     },
   });
 }
+
 export async function loginUser(input: LoginInput) {
+  const email = input.email.trim().toLowerCase();
+
   const user = await prisma.user.findUnique({
     where: {
-      email: input.email,
+      email,
     },
   });
 
@@ -139,7 +145,9 @@ export async function loginUser(input: LoginInput) {
     .digest("hex");
 
   const refreshTokenExpiresAt = new Date();
-  refreshTokenExpiresAt.setDate(refreshTokenExpiresAt.getDate() + 7);
+  refreshTokenExpiresAt.setDate(
+    refreshTokenExpiresAt.getDate() + 7,
+  );
 
   await prisma.$transaction([
     prisma.refreshToken.create({

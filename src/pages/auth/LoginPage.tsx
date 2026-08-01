@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthInput from "../../components/auth/AuthInput";
 import AuthLayout from "../../components/auth/AuthLayout";
 import AuthSubmitButton from "../../components/auth/AuthSubmitButton";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import {
   loginSchema,
   type LoginFormValues,

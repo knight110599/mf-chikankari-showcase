@@ -9,7 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 const accountSections = [
   {
@@ -44,7 +44,7 @@ export default function AccountPage() {
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
-    .map((name) => name.charAt(0).toUpperCase())
+    .map((name: string) => name.charAt(0).toUpperCase())
     .join("");
 
   const handleLogout = () => {

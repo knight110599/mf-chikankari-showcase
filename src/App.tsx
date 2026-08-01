@@ -15,6 +15,7 @@ import ContactPage from "./pages/ContactPage";
 import HomePage from "./pages/HomePage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import ProductsPage from "./pages/ProductsPage";
+import WholesaleRegistrationPage from "./pages/WholesaleRegistrationPage";
 
 import AccountPage from "./pages/account/AccountPage";
 
@@ -46,7 +47,10 @@ function App() {
           path="products/:slug"
           element={<ProductDetailsPage />}
         />
-
+<Route
+  path="/wholesale"
+  element={<WholesaleRegistrationPage />}
+/>
         <Route path="categories" element={<CategoriesPage />} />
         <Route
           path="categories/:slug"
