@@ -13,11 +13,16 @@ const productSchema = z.object({
   category: z.string().min(1, "Category is required"),
   price: z.coerce.number().min(1, "Selling price must be greater than 0"),
   wholesalePrice: z.coerce
-  .number()
-  .min(0, "Wholesale price cannot be negative")
-  .optional(),
+    .number()
+    .min(0, "Wholesale price cannot be negative")
+    .optional(),
 
-stock: z.coerce
+  minimumWholesaleQuantity: z.coerce
+    .number()
+    .int("Minimum wholesale quantity must be a whole number")
+    .min(1, "Minimum wholesale quantity must be at least 1"),
+
+  stock: z.coerce
   .number()
   .int("Stock must be a whole number")
   .min(0, "Stock cannot be negative"),
@@ -40,6 +45,7 @@ export interface ProductFormInitialValues {
   category: string;
   price: number;
   wholesalePrice: number;
+  minimumWholesaleQuantity: number;
   stock: number;
   fabric: string;
   sizes: string;
@@ -82,6 +88,7 @@ const emptyValues: ProductFormInitialValues = {
   category: "",
   price: 0,
   wholesalePrice: 0,
+  minimumWholesaleQuantity: 1,
   stock: 0,
   fabric: "",
   sizes: "",
@@ -253,6 +260,8 @@ const uploadImage = async (
   categoryId: data.category,
   price: data.price,
   wholesalePrice: data.wholesalePrice ?? 0,
+  minimumWholesaleQuantity:
+    data.minimumWholesaleQuantity,
   stock: data.stock,
   fabric: data.fabric?.trim() || undefined,
   sizes:
@@ -508,6 +517,27 @@ const endpoint =
               {errors.wholesalePrice && (
                 <p className="mt-2 text-xs text-red-600">
                   {errors.wholesalePrice.message}
+                </p>
+              )}
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-semibold text-[#263D35]">
+                Minimum Wholesale Quantity
+              </span>
+
+              <input
+                type="number"
+                min="1"
+                step="1"
+                {...register("minimumWholesaleQuantity")}
+                placeholder="5"
+                className={inputClassName}
+              />
+
+              {errors.minimumWholesaleQuantity && (
+                <p className="mt-2 text-xs text-red-600">
+                  {errors.minimumWholesaleQuantity.message}
                 </p>
               )}
             </label>

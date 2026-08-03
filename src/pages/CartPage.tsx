@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { useCart, type CartItem } from "../context/CartContext";
+import { useCart } from "../context/useCart";
+import type { CartItem } from "../context/CartContext";
 
 function getProductImage(item: CartItem) {
   const sortedImages = [...item.images].sort(
@@ -132,8 +133,8 @@ function CartPage() {
       <section className="mx-auto grid max-w-[1500px] gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1fr_390px] lg:items-start lg:px-12 lg:py-16">
         <div className="space-y-5">
           {cartItems.map((item, index) => {
-            const price = Number(item.price);
-            const itemTotal = price * item.quantity;
+            const price = item.unitPrice;
+const itemTotal = item.unitPrice * item.quantity;
             const productImage = getProductImage(item);
 
             return (
@@ -229,21 +230,31 @@ function CartPage() {
 
                     <div className="mt-auto flex flex-col gap-5 pt-6 sm:flex-row sm:items-end sm:justify-between">
                       <div>
-                        <p
-                          className="text-xs text-[#81908A]"
-                          style={{ fontFamily: "Poppins" }}
-                        >
-                          Price
-                        </p>
+                        <div className="space-y-1">
+  <p
+    className="text-xs text-[#81908A]"
+    style={{ fontFamily: "Poppins" }}
+  >
+    {item.pricingType === "WHOLESALE"
+      ? "Wholesale Price"
+      : "Retail Price"}
+  </p>
 
-                        <p
-                          className="mt-1 text-2xl font-semibold text-[#0F4C3A]"
-                          style={{
-                            fontFamily: "Cormorant Garamond",
-                          }}
-                        >
-                          ₹{price.toLocaleString("en-IN")}
-                        </p>
+  <p
+    className="text-2xl font-semibold text-[#0F4C3A]"
+    style={{
+      fontFamily: "Cormorant Garamond",
+    }}
+  >
+    ₹{price.toLocaleString("en-IN")}
+  </p>
+
+  {item.pricingType === "WHOLESALE" && (
+    <span className="inline-flex rounded-full bg-[#0F4C3A] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white">
+      Wholesale
+    </span>
+  )}
+</div>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-5">

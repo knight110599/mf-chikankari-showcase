@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+
 import AdminProductForm, {
   type ProductFormInitialValues,
 } from "../../components/admin/AdminProductForm";
@@ -12,10 +13,16 @@ interface ProductApiResponse {
 }
 
 const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5000/api";
 
-function getPrimaryImageUrl(product: ApiProduct): string {
-  if (!Array.isArray(product.images) || product.images.length === 0) {
+function getPrimaryImageUrl(
+  product: ApiProduct,
+): string {
+  if (
+    !Array.isArray(product.images) ||
+    product.images.length === 0
+  ) {
     return "";
   }
 
@@ -23,14 +30,16 @@ function getPrimaryImageUrl(product: ApiProduct): string {
     (image) => image.isPrimary,
   );
 
-  return primaryImage?.url ?? product.images[0]?.url ?? "";
+  return (
+    primaryImage?.url ??
+    product.images[0]?.url ??
+    ""
+  );
 }
 
 function mapProductToFormValues(
   product: ApiProduct,
 ): ProductFormInitialValues {
-  
-
   return {
     name: product.name,
     slug: product.slug,
@@ -38,30 +47,49 @@ function mapProductToFormValues(
     description: product.description,
     category: product.categoryId,
     price: Number(product.price),
-    wholesalePrice: Number(product.wholesalePrice ?? 0),
+    wholesalePrice: Number(
+      product.wholesalePrice ?? 0,
+    ),
+    minimumWholesaleQuantity:
+      product.minimumWholesaleQuantity ?? 1,
     stock: product.stock,
     fabric: product.fabric ?? "",
     sizes: product.sizes.join(", "),
     featured: product.isFeatured,
     newArrival: product.isNewArrival,
-    status: product.status as "DRAFT" | "ACTIVE" | "ARCHIVED",
+    status: product.status as
+      | "DRAFT"
+      | "ACTIVE"
+      | "ARCHIVED",
     image: getPrimaryImageUrl(product),
   };
 }
 
 export default function AdminEditProductPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<{
+    id: string;
+  }>();
 
-  const [initialValues, setInitialValues] =
-    useState<ProductFormInitialValues | null>(null);
+  const [
+    initialValues,
+    setInitialValues,
+  ] =
+    useState<ProductFormInitialValues | null>(
+      null,
+    );
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const [loadError, setLoadError] =
+    useState("");
 
   useEffect(() => {
     const loadProduct = async () => {
       if (!id) {
-        setLoadError("Product ID is missing.");
+        setLoadError(
+          "Product ID is missing.",
+        );
         setIsLoading(false);
         return;
       }
@@ -70,7 +98,10 @@ export default function AdminEditProductPage() {
       setLoadError("");
 
       try {
-        const token = localStorage.getItem("adminAccessToken");
+        const token =
+          localStorage.getItem(
+            "adminAccessToken",
+          );
 
         if (!token) {
           throw new Error(
@@ -79,7 +110,9 @@ export default function AdminEditProductPage() {
         }
 
         const response = await fetch(
-          `${API_URL}/products/${encodeURIComponent(id)}`,
+          `${API_URL}/products/${encodeURIComponent(
+            id,
+          )}`,
           {
             method: "GET",
             headers: {
@@ -94,12 +127,15 @@ export default function AdminEditProductPage() {
 
         if (!response.ok) {
           throw new Error(
-            result.message || "Unable to load product.",
+            result.message ||
+              "Unable to load product.",
           );
         }
 
         setInitialValues(
-          mapProductToFormValues(result.data),
+          mapProductToFormValues(
+            result.data,
+          ),
         );
       } catch (error) {
         setLoadError(
@@ -123,7 +159,11 @@ export default function AdminEditProductPage() {
     );
   }
 
-  if (loadError || !id || !initialValues) {
+  if (
+    loadError ||
+    !id ||
+    !initialValues
+  ) {
     return (
       <section className="rounded-[24px] border border-red-200 bg-white p-8 shadow-sm">
         <h1 className="font-serif text-3xl text-[#0F4C3A]">
@@ -131,7 +171,8 @@ export default function AdminEditProductPage() {
         </h1>
 
         <p className="mt-3 text-sm text-red-700">
-          {loadError || "Product data is unavailable."}
+          {loadError ||
+            "Product data is unavailable."}
         </p>
 
         <Link

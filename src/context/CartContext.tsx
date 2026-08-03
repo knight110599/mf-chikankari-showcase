@@ -1,21 +1,28 @@
 import {
   createContext,
-  useContext,
+  useCallback,
   useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
+
+import { useAuth } from "./useAuth";
 import type { ApiProduct } from "../services/product.service";
+
+export type CartPricingType = "RETAIL" | "WHOLESALE";
 
 export type CartItem = ApiProduct & {
   quantity: number;
   selectedSize: string;
+  unitPrice: number;
+  pricingType: CartPricingType;
+  minimumQuantity: number;
 };
 
 type ProductId = ApiProduct["id"];
 
-type CartContextType = {
+export type CartContextType = {
   cartItems: CartItem[];
   cartCount: number;
   subtotal: number;
@@ -24,145 +31,261 @@ type CartContextType = {
     quantity?: number,
     selectedSize?: string,
   ) => void;
-  increaseQuantity: (productId: ProductId, selectedSize: string) => void;
-  decreaseQuantity: (productId: ProductId, selectedSize: string) => void;
-  removeFromCart: (productId: ProductId, selectedSize: string) => void;
+  increaseQuantity: (
+    productId: ProductId,
+    selectedSize: string,
+  ) => void;
+  decreaseQuantity: (
+    productId: ProductId,
+    selectedSize: string,
+  ) => void;
+  removeFromCart: (
+    productId: ProductId,
+    selectedSize: string,
+  ) => void;
   clearCart: () => void;
 };
-
-const CartContext = createContext<CartContextType | undefined>(undefined);
-
-const CART_STORAGE_KEY = "mf-chikankari-cart";
 
 type CartProviderProps = {
   children: ReactNode;
 };
 
-export function CartProvider({ children }: CartProviderProps) {
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+const CART_STORAGE_KEY = "mf-chikankari-cart";
+
+export const CartContext =
+  createContext<CartContextType | undefined>(undefined);
+
+function getWholesalePrice(product: ApiProduct) {
+  if (product.wholesalePrice === null) {
+    return null;
+  }
+
+  const value = Number(product.wholesalePrice);
+
+  return Number.isFinite(value) ? value : null;
+}
+
+function getRetailPrice(product: ApiProduct) {
+  const value = Number(product.price);
+
+  return Number.isFinite(value) ? value : 0;
+}
+
+export function CartProvider({
+  children,
+}: CartProviderProps) {
+  const { user } = useAuth();
+
+  const isWholesaleUser =
+    user?.role === "wholesale";
+
+  const [cartItems, setCartItems] = useState<
+    CartItem[]
+  >(() => {
     try {
-      const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+      const savedCart =
+        localStorage.getItem(CART_STORAGE_KEY);
 
       if (!savedCart) {
         return [];
       }
 
-      const parsedCart: unknown = JSON.parse(savedCart);
+      const parsedCart: unknown =
+        JSON.parse(savedCart);
 
-      return Array.isArray(parsedCart) ? parsedCart : [];
+      return Array.isArray(parsedCart)
+        ? (parsedCart as CartItem[])
+        : [];
     } catch {
       return [];
     }
   });
 
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    localStorage.setItem(
+      CART_STORAGE_KEY,
+      JSON.stringify(cartItems),
+    );
   }, [cartItems]);
 
-  const addToCart = (
-    product: ApiProduct,
-    quantity = 1,
-    selectedSize = "",
-  ) => {
-    if (quantity < 1 || product.stock < 1) {
-      return;
-    }
+  const getPricingDetails = useCallback(
+    (product: ApiProduct) => {
+      const wholesalePrice =
+        getWholesalePrice(product);
 
-    setCartItems((currentItems) => {
-      const existingItem = currentItems.find(
-        (item) =>
-          item.id === product.id &&
-          item.selectedSize === selectedSize,
-      );
+      const useWholesalePrice =
+        isWholesaleUser &&
+        wholesalePrice !== null;
 
-      if (existingItem) {
-        return currentItems.map((item) =>
-          item.id === product.id &&
-          item.selectedSize === selectedSize
-            ? {
-                ...item,
-                quantity: Math.min(
-                  item.quantity + quantity,
-                  product.stock,
-                ),
-              }
-            : item,
-        );
+      const minimumQuantity =
+        useWholesalePrice
+          ? Math.max(
+              product.minimumWholesaleQuantity ?? 1,
+              1,
+            )
+          : 1;
+
+      return {
+        unitPrice: useWholesalePrice
+          ? wholesalePrice
+          : getRetailPrice(product),
+
+        pricingType: useWholesalePrice
+          ? ("WHOLESALE" as const)
+          : ("RETAIL" as const),
+
+        minimumQuantity,
+      };
+    },
+    [isWholesaleUser],
+  );
+
+  const addToCart = useCallback(
+    (
+      product: ApiProduct,
+      quantity = 1,
+      selectedSize = "",
+    ) => {
+      if (product.stock < 1) {
+        return;
       }
 
-      return [
-        ...currentItems,
-        {
-          ...product,
-          quantity: Math.min(quantity, product.stock),
-          selectedSize,
-        },
-      ];
-    });
-  };
+      const pricing =
+        getPricingDetails(product);
 
-  const increaseQuantity = (
-    productId: ProductId,
-    selectedSize: string,
-  ) => {
-    setCartItems((currentItems) =>
-      currentItems.map((item) =>
-        item.id === productId &&
-        item.selectedSize === selectedSize
-          ? {
-              ...item,
-              quantity: Math.min(
-                item.quantity + 1,
-                item.stock,
-              ),
-            }
-          : item,
-      ),
-    );
-  };
+      if (
+        pricing.minimumQuantity >
+        product.stock
+      ) {
+        return;
+      }
 
-  const decreaseQuantity = (
-    productId: ProductId,
-    selectedSize: string,
-  ) => {
-    setCartItems((currentItems) =>
-      currentItems
-        .map((item) =>
+      const requestedQuantity = Math.max(
+        quantity,
+        pricing.minimumQuantity,
+      );
+
+      setCartItems((currentItems) => {
+        const existingItem =
+          currentItems.find(
+            (item) =>
+              item.id === product.id &&
+              item.selectedSize ===
+                selectedSize,
+          );
+
+        if (existingItem) {
+          return currentItems.map((item) =>
+            item.id === product.id &&
+            item.selectedSize === selectedSize
+              ? {
+                  ...item,
+                  ...pricing,
+                  quantity: Math.min(
+                    item.quantity +
+                      requestedQuantity,
+                    product.stock,
+                  ),
+                }
+              : item,
+          );
+        }
+
+        return [
+          ...currentItems,
+          {
+            ...product,
+            ...pricing,
+            quantity: Math.min(
+              requestedQuantity,
+              product.stock,
+            ),
+            selectedSize,
+          },
+        ];
+      });
+    },
+    [getPricingDetails],
+  );
+
+  const increaseQuantity = useCallback(
+    (
+      productId: ProductId,
+      selectedSize: string,
+    ) => {
+      setCartItems((currentItems) =>
+        currentItems.map((item) =>
           item.id === productId &&
           item.selectedSize === selectedSize
             ? {
                 ...item,
-                quantity: item.quantity - 1,
+                quantity: Math.min(
+                  item.quantity + 1,
+                  item.stock,
+                ),
               }
             : item,
-        )
-        .filter((item) => item.quantity > 0),
-    );
-  };
+        ),
+      );
+    },
+    [],
+  );
 
-  const removeFromCart = (
-    productId: ProductId,
-    selectedSize: string,
-  ) => {
-    setCartItems((currentItems) =>
-      currentItems.filter(
-        (item) =>
-          !(
-            item.id === productId &&
-            item.selectedSize === selectedSize
-          ),
-      ),
-    );
-  };
+  const decreaseQuantity = useCallback(
+    (
+      productId: ProductId,
+      selectedSize: string,
+    ) => {
+      setCartItems((currentItems) =>
+        currentItems.map((item) => {
+          if (
+            item.id !== productId ||
+            item.selectedSize !== selectedSize
+          ) {
+            return item;
+          }
 
-  const clearCart = () => {
+          return {
+            ...item,
+            quantity: Math.max(
+              item.quantity - 1,
+              item.minimumQuantity,
+            ),
+          };
+        }),
+      );
+    },
+    [],
+  );
+
+  const removeFromCart = useCallback(
+    (
+      productId: ProductId,
+      selectedSize: string,
+    ) => {
+      setCartItems((currentItems) =>
+        currentItems.filter(
+          (item) =>
+            !(
+              item.id === productId &&
+              item.selectedSize ===
+                selectedSize
+            ),
+        ),
+      );
+    },
+    [],
+  );
+
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  };
+  }, []);
 
   const cartCount = useMemo(
     () =>
       cartItems.reduce(
-        (total, item) => total + item.quantity,
+        (total, item) =>
+          total + item.quantity,
         0,
       ),
     [cartItems],
@@ -172,13 +295,14 @@ export function CartProvider({ children }: CartProviderProps) {
     () =>
       cartItems.reduce(
         (total, item) =>
-          total + Number(item.price) * item.quantity,
+          total +
+          item.unitPrice * item.quantity,
         0,
       ),
     [cartItems],
   );
 
-  const value = useMemo(
+  const value = useMemo<CartContextType>(
     () => ({
       cartItems,
       cartCount,
@@ -189,7 +313,16 @@ export function CartProvider({ children }: CartProviderProps) {
       removeFromCart,
       clearCart,
     }),
-    [cartItems, cartCount, subtotal],
+    [
+      cartItems,
+      cartCount,
+      subtotal,
+      addToCart,
+      increaseQuantity,
+      decreaseQuantity,
+      removeFromCart,
+      clearCart,
+    ],
   );
 
   return (
@@ -199,14 +332,3 @@ export function CartProvider({ children }: CartProviderProps) {
   );
 }
 
-export function useCart() {
-  const context = useContext(CartContext);
-
-  if (!context) {
-    throw new Error(
-      "useCart must be used inside CartProvider.",
-    );
-  }
-
-  return context;
-}

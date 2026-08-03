@@ -16,8 +16,9 @@ import {
   type ReactNode,
 } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import type { CartItem } from "../context/CartContext";
 
-import { useCart, type CartItem } from "../context/CartContext";
+import { useCart } from "../context/useCart";
 import { createOrder } from "../services/order.service";
 
 const WHATSAPP_NUMBER = "916386826199";

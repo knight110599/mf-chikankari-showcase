@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../context/useAuth";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/useCart";
 
 const navItems = [
   {
