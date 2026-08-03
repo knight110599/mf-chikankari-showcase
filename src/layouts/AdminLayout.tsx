@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Building2 } from "lucide-react";
 
 const navItems = [
   {
@@ -43,6 +44,11 @@ const navItems = [
     label: "Inventory",
     to: "/admin/inventory",
     icon: Boxes,
+  },
+  {
+    label: "Wholesale",
+    to: "/admin/wholesale",
+    icon: Building2,
   },
   {
     label: "Settings",

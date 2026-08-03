@@ -7,30 +7,27 @@ import {
   ShieldCheck,
   Store,
   UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "../../context/useAuth";
 
-const accountSections = [
-  {
-    title: "Orders",
-    description: "View your purchases and delivery progress.",
-    icon: Package,
-    status: "No orders yet",
-  },
-  {
-    title: "Saved addresses",
-    description: "Manage delivery and billing addresses.",
-    icon: MapPin,
-    status: "No addresses saved",
-  },
-  {
-    title: "Wholesale access",
-    description: "Check your dealer and wholesale account status.",
-    icon: Store,
-    status: "Not requested",
-  },
-];
+interface AccountSection {
+  title: string;
+  description: string;
+  status: string;
+  icon: LucideIcon;
+}
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
 
 export default function AccountPage() {
   const { user, logout } = useAuth();
@@ -38,14 +35,33 @@ export default function AccountPage() {
 
   const userName = user?.name?.trim() || "MF Customer";
   const userEmail = user?.email || "Email not available";
-  const userRole = user?.role || "customer";
+  const isWholesale = user?.role === "wholesale";
 
-  const initials = userName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((name: string) => name.charAt(0).toUpperCase())
-    .join("");
+  const accountSections: AccountSection[] = [
+    {
+      title: "Orders",
+      description:
+        "View your purchases and delivery progress.",
+      icon: Package,
+      status: "No orders yet",
+    },
+    {
+      title: "Saved addresses",
+      description:
+        "Manage delivery and billing addresses.",
+      icon: MapPin,
+      status: "No addresses saved",
+    },
+    {
+      title: "Wholesale access",
+      description:
+        "Check your dealer and wholesale account status.",
+      icon: Store,
+      status: isWholesale
+        ? "Wholesale active"
+        : "Not requested",
+    },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -65,15 +81,17 @@ export default function AccountPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl leading-7 text-[#6B756F]">
-            Manage your account details, orders, delivery addresses and
-            wholesale access from one place.
+            Manage your account details, orders, delivery
+            addresses and wholesale access from one place.
           </p>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
           <aside className="h-fit rounded-[28px] border border-[#E8DCC5] bg-white p-6 shadow-sm sm:p-7">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#0F4C3A] font-serif text-xl font-semibold text-white">
-              {initials || <UserRound className="h-7 w-7" />}
+              {getInitials(userName) || (
+                <UserRound className="h-7 w-7" />
+              )}
             </div>
 
             <h2 className="mt-5 font-serif text-2xl font-semibold text-[#123C31]">
@@ -82,12 +100,16 @@ export default function AccountPage() {
 
             <div className="mt-3 flex items-start gap-2 text-sm text-[#6B756F]">
               <Mail className="mt-0.5 h-4 w-4 shrink-0" />
-              <span className="break-all">{userEmail}</span>
+              <span className="break-all">
+                {userEmail}
+              </span>
             </div>
 
             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#F0F6F3] px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F4C3A]">
               <ShieldCheck className="h-4 w-4" />
-              {userRole} account
+              {isWholesale
+                ? "Wholesale account"
+                : "Customer account"}
             </div>
 
             <div className="mt-8 border-t border-[#E8DCC5] pt-6">
@@ -134,12 +156,15 @@ export default function AccountPage() {
             </div>
 
             <div className="mt-8 grid gap-4">
-              {accountSections.map((section) => {
-                const Icon = section.icon;
-
-                return (
+              {accountSections.map(
+                ({
+                  title,
+                  description,
+                  status,
+                  icon: Icon,
+                }) => (
                   <article
-                    key={section.title}
+                    key={title}
                     className="group flex flex-col gap-5 rounded-[22px] border border-[#E8DCC5] bg-[#FCFAF6] p-5 transition hover:border-[#C9A86A] sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex items-start gap-4">
@@ -149,23 +174,23 @@ export default function AccountPage() {
 
                       <div>
                         <h3 className="font-serif text-xl font-semibold text-[#123C31]">
-                          {section.title}
+                          {title}
                         </h3>
 
                         <p className="mt-1 text-sm leading-6 text-[#6B756F]">
-                          {section.description}
+                          {description}
                         </p>
 
                         <p className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#9B7B3D]">
-                          {section.status}
+                          {status}
                         </p>
                       </div>
                     </div>
 
                     <ChevronRight className="hidden h-5 w-5 shrink-0 text-[#B7A787] transition group-hover:translate-x-1 group-hover:text-[#0F4C3A] sm:block" />
                   </article>
-                );
-              })}
+                ),
+              )}
             </div>
 
             <div className="mt-8 rounded-[24px] border border-dashed border-[#D9C8A8] bg-[#FCFAF6] px-6 py-10 text-center">
@@ -176,13 +201,16 @@ export default function AccountPage() {
               </h3>
 
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#6B756F]">
-                Once you place an order, its details and delivery progress will
-                appear inside your account.
+                Once you place an order, its details and
+                delivery progress will appear inside your
+                account.
               </p>
 
               <button
                 type="button"
-                onClick={() => navigate("/products")}
+                onClick={() =>
+                  navigate("/products")
+                }
                 className="mt-6 rounded-full bg-[#0F4C3A] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#0B3F30]"
               >
                 Explore collection
