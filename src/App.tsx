@@ -28,6 +28,7 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
 import AdminWholesalePage from "./pages/admin/AdminWholesalePage";
+import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
 
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import LoginPage from "./pages/auth/LoginPage";
@@ -118,10 +119,15 @@ function App() {
   path="/admin/wholesale"
   element={<AdminWholesalePage />}
 />
+
           <Route
             path="orders"
             element={<AdminOrdersPage />}
           />
+          <Route
+  path="/admin/customers"
+  element={<AdminCustomersPage />}
+/>
         </Route>
       </Route>
     </Routes>

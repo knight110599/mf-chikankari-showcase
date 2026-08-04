@@ -241,39 +241,7 @@ function ProductDetailsPage() {
     ];
   }, [product]);
 
-  useEffect(() => {
-    if (!product) {
-      return;
-    }
-
-    const wholesalePrice =
-      product.wholesalePrice !== null
-        ? Number(product.wholesalePrice)
-        : null;
-
-    const canUseWholesalePrice =
-      isWholesaleUser &&
-      wholesalePrice !== null &&
-      Number.isFinite(wholesalePrice);
-
-    const minimumQuantity = canUseWholesalePrice
-      ? Math.max(
-          product.minimumWholesaleQuantity ?? 1,
-          1,
-        )
-      : 1;
-
-    const nextQuantity =
-      product.stock > 0
-        ? Math.min(minimumQuantity, product.stock)
-        : 1;
-
-    setQuantity(nextQuantity);
-  }, [
-    product,
-    isWholesaleUser,
-  ]);
-
+  
   if (loading) {
     return (
       <main className="min-h-screen bg-[#F8F5F0]">
