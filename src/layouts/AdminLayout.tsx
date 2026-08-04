@@ -6,7 +6,6 @@ import {
   LogOut,
   Menu,
   Package,
-  Settings,
   ShoppingBag,
   Users,
   X,
@@ -49,11 +48,6 @@ const navItems = [
     label: "Wholesale",
     to: "/admin/wholesale",
     icon: Building2,
-  },
-  {
-    label: "Settings",
-    to: "/admin/settings",
-    icon: Settings,
   },
 ];
 type AdminUser = {
