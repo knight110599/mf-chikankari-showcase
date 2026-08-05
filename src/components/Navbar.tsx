@@ -12,30 +12,16 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+
 import { useAuth } from "../context/useAuth";
 import { useCart } from "../context/useCart";
 
 const navItems = [
-  {
-    name: "Home",
-    to: "/",
-  },
-  {
-    name: "Products",
-    to: "/products",
-  },
-  {
-    name: "Categories",
-    to: "/categories",
-  },
-  {
-    name: "About",
-    to: "/about",
-  },
-  {
-    name: "Contact",
-    to: "/contact",
-  },
+  { name: "Home", to: "/" },
+  { name: "Products", to: "/products" },
+  { name: "Categories", to: "/categories" },
+  { name: "About", to: "/about" },
+  { name: "Contact", to: "/contact" },
 ];
 
 const whatsappUrl =
@@ -48,16 +34,12 @@ function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const {
-    isAuthenticated,
-    user,
-    logout,
-  } = useAuth();
-
+  const { isAuthenticated, user, logout } = useAuth();
   const { cartCount } = useCart();
 
   const isHomePage = location.pathname === "/";
-  const isTransparent = isHomePage && !scrolled && !open;
+  const isTransparent =
+    isHomePage && !scrolled && !open;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,22 +53,21 @@ function Navbar() {
     });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        handleScroll,
+      );
     };
   }, []);
 
-  useEffect(() => {
+  const closeMenu = () => {
     setOpen(false);
-  }, [location.pathname]);
+  };
 
   const handleLogout = () => {
     logout();
-    setOpen(false);
+    closeMenu();
     navigate("/", { replace: true });
-  };
-
-  const closeMenu = () => {
-    setOpen(false);
   };
 
   return (
@@ -98,39 +79,13 @@ function Navbar() {
       }`}
     >
       <div
-        className={`mx-auto flex w-full max-w-7xl items-center justify-between px-5 transition-all duration-500 sm:px-8 lg:px-12 ${
+        className={`mx-auto hidden w-full max-w-7xl items-center justify-between px-8 transition-all duration-500 md:flex lg:px-12 ${
           scrolled || !isHomePage
             ? "h-20 md:h-24"
             : "h-24 md:h-28"
         }`}
       >
-        <Link
-          to="/"
-          onClick={closeMenu}
-          className="flex flex-col transition-transform duration-300 hover:scale-[1.02]"
-          aria-label="MF Chikankari home"
-        >
-          <span
-            className="text-[10px] uppercase tracking-[0.35em] text-[#C9A86A] sm:text-[11px] sm:tracking-[0.4em]"
-            style={{ fontFamily: "Poppins" }}
-          >
-            Lucknow
-          </span>
-
-          <span
-            className="text-2xl leading-none text-[#0F4C3A] sm:text-3xl md:text-4xl"
-            style={{ fontFamily: "Cormorant Garamond" }}
-          >
-            MF Chikankari
-          </span>
-
-          <span
-            className="text-[10px] tracking-[0.22em] text-[#6A2435] sm:text-xs sm:tracking-[0.25em]"
-            style={{ fontFamily: "Poppins" }}
-          >
-            HANDICRAFT
-          </span>
-        </Link>
+        <DesktopBrandLogo />
 
         <ul
           className="hidden items-center gap-8 md:flex lg:gap-10"
@@ -152,7 +107,6 @@ function Navbar() {
                 {({ isActive }) => (
                   <>
                     {item.name}
-
                     <span
                       className={`absolute -bottom-1 left-0 h-[2px] bg-[#C9A86A] transition-all duration-300 ${
                         isActive
@@ -175,7 +129,6 @@ function Navbar() {
                 className="inline-flex h-11 max-w-52 items-center gap-2 rounded-full border border-[#D9C8A8] bg-[#F8F5F0]/55 px-5 text-sm font-semibold text-[#0F4C3A] backdrop-blur-md transition hover:border-[#0F4C3A] hover:bg-[#F8F5F0]"
               >
                 <UserRound className="h-4 w-4 shrink-0" />
-
                 <span className="truncate">
                   {user?.name || "My Account"}
                 </span>
@@ -208,19 +161,10 @@ function Navbar() {
             </>
           )}
 
-          <Link
-            to="/cart"
-            className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D9C8A8] bg-[#F8F5F0]/55 text-[#0F4C3A] backdrop-blur-md transition hover:border-[#0F4C3A] hover:bg-[#F8F5F0]"
-            aria-label={`Shopping cart with ${cartCount} items`}
-          >
-            <ShoppingBag className="h-5 w-5" />
-
-            {cartCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6A2435] px-1 text-[10px] font-bold leading-none text-white">
-                {cartCount > 99 ? "99+" : cartCount}
-              </span>
-            )}
-          </Link>
+          <CartIconButton
+            cartCount={cartCount}
+            mobile={false}
+          />
 
           <a
             href={whatsappUrl}
@@ -232,27 +176,30 @@ function Navbar() {
             WhatsApp
           </a>
         </div>
+      </div>
 
-        <div className="flex items-center gap-2 md:hidden">
-          <Link
-            to="/cart"
+      <div
+        className={`flex w-full items-center justify-between px-3 transition-all duration-300 sm:px-5 md:hidden ${
+          scrolled || !isHomePage
+            ? "h-[76px]"
+            : "h-[88px]"
+        }`}
+      >
+        <MobileBrandLogo onClick={closeMenu} />
+
+        <div className="flex shrink-0 items-center gap-2">
+          <CartIconButton
+            cartCount={cartCount}
+            mobile
             onClick={closeMenu}
-            className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB]/80"
-            aria-label={`Shopping cart with ${cartCount} items`}
-          >
-            <ShoppingBag className="h-5 w-5" />
-
-            {cartCount > 0 && (
-              <span className="absolute right-0 top-0 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6A2435] px-1 text-[10px] font-bold leading-none text-white">
-                {cartCount > 99 ? "99+" : cartCount}
-              </span>
-            )}
-          </Link>
+          />
 
           <button
             type="button"
-            onClick={() => setOpen((current) => !current)}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB]/80"
+            onClick={() =>
+              setOpen((current) => !current)
+            }
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#0F4C3A] transition hover:bg-[#EFE8DB]/80"
             aria-label={
               open
                 ? "Close navigation menu"
@@ -261,7 +208,11 @@ function Navbar() {
             aria-expanded={open}
             aria-controls="mobile-navigation"
           >
-            {open ? <X size={26} /> : <Menu size={26} />}
+            {open ? (
+              <X size={25} />
+            ) : (
+              <Menu size={25} />
+            )}
           </button>
         </div>
       </div>
@@ -313,7 +264,7 @@ function Navbar() {
 
                 {cartCount > 0 && (
                   <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-[#6A2435] px-2 text-xs font-bold text-white">
-                    {cartCount}
+                    {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
               </NavLink>
@@ -328,7 +279,6 @@ function Navbar() {
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#0F4C3A] px-5 text-sm font-semibold text-[#0F4C3A]"
                   >
                     <UserRound className="h-4 w-4" />
-
                     <span className="max-w-56 truncate">
                       {user?.name || "My Account"}
                     </span>
@@ -377,6 +327,114 @@ function Navbar() {
         </div>
       )}
     </nav>
+  );
+}
+
+function DesktopBrandLogo() {
+  return (
+    <Link
+      to="/"
+      className="flex flex-col transition-transform duration-300 hover:scale-[1.02]"
+      aria-label="MF Chikankari home"
+    >
+      <span
+        className="text-[10px] uppercase tracking-[0.35em] text-[#C9A86A] sm:text-[11px] sm:tracking-[0.4em]"
+        style={{ fontFamily: "Poppins" }}
+      >
+        Lucknow
+      </span>
+
+      <span
+        className="text-2xl leading-none text-[#0F4C3A] sm:text-3xl md:text-4xl"
+        style={{
+          fontFamily: "Cormorant Garamond",
+        }}
+      >
+        MF Chikankari
+      </span>
+
+      <span
+        className="text-[10px] tracking-[0.22em] text-[#6A2435] sm:text-xs sm:tracking-[0.25em]"
+        style={{ fontFamily: "Poppins" }}
+      >
+        HANDICRAFT
+      </span>
+    </Link>
+  );
+}
+
+function MobileBrandLogo({
+  onClick,
+}: {
+  onClick: () => void;
+}) {
+  return (
+    <Link
+      to="/"
+      onClick={onClick}
+      className="min-w-0 pr-2"
+      aria-label="MF Chikankari home"
+    >
+      <span
+        className="block text-[8px] uppercase tracking-[0.3em] text-[#C9A86A] min-[380px]:text-[9px]"
+        style={{ fontFamily: "Poppins" }}
+      >
+        Lucknow
+      </span>
+
+      <span
+        className="block truncate text-[23px] leading-[0.95] text-[#0F4C3A] min-[380px]:text-[26px]"
+        style={{
+          fontFamily: "Cormorant Garamond",
+        }}
+      >
+        MF Chikankari
+      </span>
+
+      <span
+        className="block text-[8px] tracking-[0.19em] text-[#6A2435] min-[380px]:text-[9px]"
+        style={{ fontFamily: "Poppins" }}
+      >
+        HANDICRAFT
+      </span>
+    </Link>
+  );
+}
+
+function CartIconButton({
+  cartCount,
+  mobile,
+  onClick,
+}: {
+  cartCount: number;
+  mobile: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      to="/cart"
+      onClick={onClick}
+      className={
+        mobile
+          ? "relative z-10 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#D9C8A8] bg-white/80 text-[#0F4C3A] shadow-sm transition hover:bg-[#EFE8DB]"
+          : "relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#D9C8A8] bg-[#F8F5F0]/55 text-[#0F4C3A] backdrop-blur-md transition hover:border-[#0F4C3A] hover:bg-[#F8F5F0]"
+      }
+      aria-label={`Shopping cart with ${cartCount} items`}
+    >
+      <ShoppingBag className="h-5 w-5" />
+
+      {cartCount > 0 && (
+        <span
+          className={
+            mobile
+              ? "absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6A2435] px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[#F8F5F0]"
+              : "absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#6A2435] px-1 text-[10px] font-bold leading-none text-white"
+          }
+        >
+          {cartCount > 99 ? "99+" : cartCount}
+        </span>
+      )}
+    </Link>
   );
 }
 
