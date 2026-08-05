@@ -56,10 +56,11 @@ export async function createProduct(
       shortDescription: input.shortDescription || null,
       description: input.description || null,
       price: new Prisma.Decimal(input.price),
-      wholesalePrice:
-        input.wholesalePrice !== undefined
-          ? new Prisma.Decimal(input.wholesalePrice)
-          : null,
+      wwholesalePrice:
+  input.wholesalePrice === undefined ||
+  input.wholesalePrice === null
+    ? null
+    : new Prisma.Decimal(input.wholesalePrice),
       stock: input.stock ?? 0,
       minimumWholesaleQuantity:
         input.minimumWholesaleQuantity ?? null,

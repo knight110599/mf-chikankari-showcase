@@ -16,30 +16,34 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   "http://localhost:5000/api";
 
-function getPrimaryImageUrl(
-  product: ApiProduct,
-): string {
-  if (
-    !Array.isArray(product.images) ||
-    product.images.length === 0
-  ) {
-    return "";
-  }
-
-  const primaryImage = product.images.find(
-    (image) => image.isPrimary,
-  );
-
-  return (
-    primaryImage?.url ??
-    product.images[0]?.url ??
-    ""
-  );
-}
-
 function mapProductToFormValues(
   product: ApiProduct,
 ): ProductFormInitialValues {
+  const sortedImages = [...product.images]
+    .sort(
+      (first, second) =>
+        first.sortOrder - second.sortOrder,
+    )
+    .map((image, index) => ({
+      id: image.id,
+      url: image.url,
+      altText: image.altText,
+      sortOrder: index,
+      isPrimary: image.isPrimary,
+    }));
+
+  if (
+    sortedImages.length > 0 &&
+    !sortedImages.some(
+      (image) => image.isPrimary,
+    )
+  ) {
+    sortedImages[0] = {
+      ...sortedImages[0],
+      isPrimary: true,
+    };
+  }
+
   return {
     name: product.name,
     slug: product.slug,
@@ -61,7 +65,7 @@ function mapProductToFormValues(
       | "DRAFT"
       | "ACTIVE"
       | "ARCHIVED",
-    image: getPrimaryImageUrl(product),
+    images: sortedImages,
   };
 }
 

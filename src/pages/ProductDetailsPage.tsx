@@ -634,15 +634,17 @@ function ProductDetailsPage() {
 
               <span
                 className={
-                  productStock > 0
-                    ? "font-semibold text-emerald-700"
-                    : "font-semibold text-red-600"
-                }
-              >
-                {productStock > 0
-                  ? `${productStock} available`
-                  : "Out of stock"}
-              </span>
+  productStock > 0
+    ? "font-semibold text-emerald-700"
+    : "font-semibold text-red-600"
+}
+>
+  {productStock <= 0
+    ? "Out of stock"
+    : productStock <= 5
+      ? "Only a few left"
+      : "In stock"}
+</span>
             </div>
 
             <p
@@ -775,24 +777,28 @@ function ProductDetailsPage() {
                   </h2>
 
                   <div className="mt-1 space-y-1 text-xs text-[#84908B]">
-                    <p>
-                      Maximum available:{" "}
-                      {productStock}
-                    </p>
+  <p
+    className={
+      productStock > 0
+        ? "font-medium text-emerald-700"
+        : "font-medium text-red-600"
+    }
+  >
+    {productStock <= 0
+      ? "Out of stock"
+      : productStock <= 5
+        ? "Only a few left"
+        : "In stock"}
+  </p>
 
-                    {canUseWholesalePrice &&
-                      minimumOrderQuantity >
-                        1 && (
-                        <p className="font-medium text-[#9B7B3D]">
-                          Wholesale
-                          minimum:{" "}
-                          {
-                            minimumOrderQuantity
-                          }{" "}
-                          pieces
-                        </p>
-                      )}
-                  </div>
+  {canUseWholesalePrice &&
+    minimumOrderQuantity > 1 && (
+      <p className="font-medium text-[#9B7B3D]">
+        Wholesale minimum:{" "}
+        {minimumOrderQuantity} pieces
+      </p>
+    )}
+</div>
                 </div>
 
                 <div className="inline-flex items-center rounded-full border border-[#D9C8A8] bg-[#F8F5F0] p-1">
