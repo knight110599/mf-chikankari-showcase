@@ -1038,6 +1038,7 @@ return (
         </div>
       )}
       <AddInventoryVariantModal
+  key={variantProduct?.id ?? "add-inventory-variant-closed"}
   isOpen={variantProduct !== null}
   product={variantProduct}
   onClose={() => setVariantProduct(null)}
@@ -1045,12 +1046,14 @@ return (
 />
 
 <RestockInventoryModal
+  key={restockVariant?.id ?? "restock-inventory-closed"}
   isOpen={restockVariant !== null}
   variant={restockVariant}
   onClose={() => setRestockVariant(null)}
   onSuccess={handleRestockSuccess}
 />
 <AdjustInventoryStockModal
+  key={adjustVariant?.id ?? "adjust-inventory-closed"}
   isOpen={adjustVariant !== null}
   variant={adjustVariant}
   onClose={() => setAdjustVariant(null)}

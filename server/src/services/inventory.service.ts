@@ -580,17 +580,17 @@ export async function createProductVariant(
         : String(error.meta?.target ?? "");
 
       if (target.includes("barcode")) {
-        throw new Error("BARCODE_ALREADY_EXISTS");
+        throw new Error("BARCODE_ALREADY_EXISTS", { cause: error });
       }
 
       if (
         target.includes("productId") &&
         target.includes("size")
       ) {
-        throw new Error("VARIANT_SIZE_ALREADY_EXISTS");
+        throw new Error("VARIANT_SIZE_ALREADY_EXISTS", { cause: error });
       }
 
-      throw new Error("VARIANT_SKU_ALREADY_EXISTS");
+      throw new Error("VARIANT_SKU_ALREADY_EXISTS", { cause: error });
     }
 
     throw error;
@@ -780,10 +780,10 @@ export async function updateProductVariant(
         : String(error.meta?.target ?? "");
 
       if (target.includes("barcode")) {
-        throw new Error("BARCODE_ALREADY_EXISTS");
+        throw new Error("BARCODE_ALREADY_EXISTS", { cause: error });
       }
 
-      throw new Error("VARIANT_SKU_ALREADY_EXISTS");
+      throw new Error("VARIANT_SKU_ALREADY_EXISTS", { cause: error });
     }
 
     throw error;

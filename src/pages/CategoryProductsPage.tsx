@@ -80,9 +80,6 @@ function CategoryProductsPage() {
     };
   }, [reloadKey]);
 
-  useEffect(() => {
-    setVisibleCount(PRODUCTS_PER_PAGE);
-  }, [slug, search, sortBy]);
 
   const categoryProducts = useMemo(() => {
     if (!slug) return [];
@@ -376,9 +373,10 @@ function CategoryProductsPage() {
                   id="category-product-search"
                   type="search"
                   value={search}
-                  onChange={(event) =>
-                    setSearch(event.target.value)
-                  }
+                  onChange={(event) => {
+  setSearch(event.target.value);
+  setVisibleCount(PRODUCTS_PER_PAGE);
+}}
                   placeholder={`Search ${categoryName.toLowerCase()}...`}
                   className="h-13 w-full rounded-2xl border border-[#DDD1BB] bg-[#FBF9F5] py-3 pl-11 pr-4 text-sm text-[#263D35] outline-none transition placeholder:text-[#9AA39F] focus:border-[#0F4C3A] focus:bg-white focus:ring-4 focus:ring-[#0F4C3A]/5"
                   style={{ fontFamily: "Poppins" }}
@@ -398,9 +396,10 @@ function CategoryProductsPage() {
               <select
                 id="category-product-sort"
                 value={sortBy}
-                onChange={(event) =>
-                  setSortBy(event.target.value)
-                }
+                onChange={(event) => {
+  setSortBy(event.target.value);
+  setVisibleCount(PRODUCTS_PER_PAGE);
+}}
                 className="h-13 w-full cursor-pointer rounded-2xl border border-[#DDD1BB] bg-[#FBF9F5] px-4 py-3 text-sm text-[#263D35] outline-none transition focus:border-[#0F4C3A] focus:bg-white focus:ring-4 focus:ring-[#0F4C3A]/5"
                 style={{ fontFamily: "Poppins" }}
               >

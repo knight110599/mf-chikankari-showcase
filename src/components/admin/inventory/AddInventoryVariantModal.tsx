@@ -50,25 +50,7 @@ export default function AddInventoryVariantModal({
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
 
-    setSize("");
-    setSku("");
-    setBarcode("");
-    setStock("0");
-    setReservedStock("0");
-    setLowStockThreshold("5");
-    setCostPrice("");
-    setWeightGrams("");
-    setSortOrder("0");
-    setIsDefault(false);
-    setIsActive(true);
-    setErrorMessage("");
-    setIsSubmitting(false);
-  }, [isOpen, product?.id]);
 
   useEffect(() => {
     if (!isOpen) {

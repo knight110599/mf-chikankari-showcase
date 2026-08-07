@@ -802,43 +802,70 @@ export default function OrderDetailsModal({
   const [errorMessage, setErrorMessage] =
     useState("");
   const [printError, setPrintError] = useState("");
+const fetchOrder = useCallback(async () => {
+  if (!orderId) {
+    return null;
+  }
 
+  const response = await getAdminOrderById(orderId);
+  return response.data;
+}, [orderId]);
   const loadOrder = useCallback(async () => {
-    if (!orderId) {
-      return;
+  setIsLoading(true);
+  setErrorMessage("");
+  setPrintError("");
+
+  try {
+    const orderData = await fetchOrder();
+
+    if (orderData) {
+      setOrder(orderData);
     }
-
-    try {
-      setIsLoading(true);
-      setErrorMessage("");
-      setPrintError("");
-
-      const response =
-        await getAdminOrderById(orderId);
-
-      setOrder(response.data);
-    } catch (error) {
-      setOrder(null);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to load order details.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [orderId]);
+  } catch (error) {
+    setOrder(null);
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "Unable to load order details.",
+    );
+  } finally {
+    setIsLoading(false);
+  }
+}, [fetchOrder]);
 
   useEffect(() => {
-    if (!isOpen || !orderId) {
-      setOrder(null);
-      setErrorMessage("");
-      setPrintError("");
-      return;
-    }
+  if (!isOpen || !orderId) {
+    return;
+  }
 
-    void loadOrder();
-  }, [isOpen, orderId, loadOrder]);
+  let isMounted = true;
+
+  void fetchOrder()
+    .then((orderData) => {
+      if (isMounted && orderData) {
+        setOrder(orderData);
+      }
+    })
+    .catch((error) => {
+      if (isMounted) {
+        setOrder(null);
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to load order details.",
+        );
+      }
+    })
+    .finally(() => {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    });
+
+  return () => {
+    isMounted = false;
+  };
+}, [isOpen, orderId, fetchOrder]);
 
   useEffect(() => {
     if (!isOpen) {

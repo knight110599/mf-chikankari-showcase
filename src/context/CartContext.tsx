@@ -1,5 +1,4 @@
 import {
-  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -9,7 +8,7 @@ import {
 
 import { useAuth } from "./useAuth";
 import type { ApiProduct } from "../services/product.service";
-
+import { CartContext } from "./cart-context";
 export type CartPricingType = "RETAIL" | "WHOLESALE";
 
 export type CartItem = ApiProduct & {
@@ -52,8 +51,6 @@ type CartProviderProps = {
 
 const CART_STORAGE_KEY = "mf-chikankari-cart";
 
-export const CartContext =
-  createContext<CartContextType | undefined>(undefined);
 
 function getWholesalePrice(product: ApiProduct) {
   if (product.wholesalePrice === null) {

@@ -36,16 +36,7 @@ export default function AdjustInventoryStockModal({
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
 
-    setQuantity("");
-    setNote("");
-    setErrorMessage("");
-    setIsSubmitting(false);
-  }, [isOpen, variant?.id]);
 
   useEffect(() => {
     if (!isOpen) {

@@ -98,39 +98,67 @@ export default function AdminCategoriesPage() {
     useState<CategoryFormState>(initialFormState);
 const [isUploadingImage, setIsUploadingImage] = useState(false);
 const [uploadError, setUploadError] = useState("");
-    
+  const fetchCategories = useCallback(async () => {
+  const response = await fetch(
+    `${API_URL}/categories?includeInactive=true&limit=100`,
+  );
+
+  const result = (await response.json()) as CategoriesResponse;
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || "Unable to load categories.",
+    );
+  }
+
+  return Array.isArray(result.data) ? result.data : [];
+}, []);
   const loadCategories = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage("");
+  setIsLoading(true);
+  setErrorMessage("");
 
-    try {
-      const response = await fetch(
-        `${API_URL}/categories?includeInactive=true&limit=100`,
-      );
-
-      const result = (await response.json()) as CategoriesResponse;
-
-      if (!response.ok) {
-        throw new Error(
-          result.message || "Unable to load categories.",
-        );
-      }
-
-      setCategories(Array.isArray(result.data) ? result.data : []);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to load categories.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  try {
+    const categoriesData = await fetchCategories();
+    setCategories(categoriesData);
+  } catch (error) {
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "Unable to load categories.",
+    );
+  } finally {
+    setIsLoading(false);
+  }
+}, [fetchCategories]);
 
   useEffect(() => {
-    void loadCategories();
-  }, [loadCategories]);
+  let isMounted = true;
+
+  void fetchCategories()
+    .then((categoriesData) => {
+      if (isMounted) {
+        setCategories(categoriesData);
+      }
+    })
+    .catch((error) => {
+      if (isMounted) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to load categories.",
+        );
+      }
+    })
+    .finally(() => {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    });
+
+  return () => {
+    isMounted = false;
+  };
+}, [fetchCategories]);
 
   const filteredCategories = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();

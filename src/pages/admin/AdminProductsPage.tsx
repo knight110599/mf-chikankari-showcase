@@ -147,13 +147,7 @@ export default function AdminProductsPage() {
     }
   };
 
-  useEffect(() => {
-    const filterFromUrl = searchParams.get("filter");
 
-    if (filterFromUrl) {
-      setSelectedFilter(filterFromUrl);
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     const loadProducts = async () => {

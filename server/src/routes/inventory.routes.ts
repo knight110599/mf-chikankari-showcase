@@ -9,7 +9,6 @@ import {
   productIdSchema,
   restockSchema,
   updateVariantSchema,
-  variantIdSchema,
 } from "../schemas/inventory.schema.js";
 
 const inventoryRouter = Router();

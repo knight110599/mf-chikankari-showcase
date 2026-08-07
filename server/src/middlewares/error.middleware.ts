@@ -11,6 +11,8 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction,
 ): void => {
+  void _next;
+
   console.error("UNHANDLED ERROR:", error);
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {

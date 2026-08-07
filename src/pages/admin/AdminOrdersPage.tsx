@@ -162,22 +162,59 @@ export default function AdminOrdersPage() {
   const [selectedOrderId, setSelectedOrderId] = useState<
     string | null
   >(null);
+const fetchOrders = useCallback(async () => {
+  const response = await getAdminOrders({
+    limit: 100,
+    sortOrder: "desc",
+  });
 
+  return response.data;
+}, []);
   const loadOrders = useCallback(async () => {
-    setIsLoading(true);
-    setErrorMessage("");
+  setIsLoading(true);
+  setErrorMessage("");
 
-    try {
-      const response = await getAdminOrders({
-        limit: 100,
-        sortOrder: "desc",
-      });
+  try {
+    const ordersData = await fetchOrders();
 
-      setOrders(response.data);
+    setOrders(ordersData);
+
+    setDrafts(
+      Object.fromEntries(
+        ordersData.map((order) => [
+          order.id,
+          {
+            status: order.status,
+            paymentStatus: order.paymentStatus,
+          },
+        ]),
+      ),
+    );
+  } catch (error) {
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : "Unable to load orders.",
+    );
+  } finally {
+    setIsLoading(false);
+  }
+}, [fetchOrders]);
+
+  useEffect(() => {
+  let isMounted = true;
+
+  void fetchOrders()
+    .then((ordersData) => {
+      if (!isMounted) {
+        return;
+      }
+
+      setOrders(ordersData);
 
       setDrafts(
         Object.fromEntries(
-          response.data.map((order) => [
+          ordersData.map((order) => [
             order.id,
             {
               status: order.status,
@@ -186,20 +223,26 @@ export default function AdminOrdersPage() {
           ]),
         ),
       );
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to load orders.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    })
+    .catch((error) => {
+      if (isMounted) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to load orders.",
+        );
+      }
+    })
+    .finally(() => {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    });
 
-  useEffect(() => {
-    void loadOrders();
-  }, [loadOrders]);
+  return () => {
+    isMounted = false;
+  };
+}, [fetchOrders]);
 
   const handleDraftChange = (
     orderId: string,
