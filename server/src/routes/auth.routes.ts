@@ -1,11 +1,15 @@
 import { Router } from "express";
 import cookieParser from "cookie-parser";
+
 import * as authController from "../controllers/auth.controller.js";
-import { protect } from "../middlewares/auth.middleware.js";
-import { authLimiter } from "../middlewares/rate-limit.middleware.js";
-import { requireTrustedOrigin } from "../middlewares/csrf.middleware.js";
 import { doubleCsrfProtection } from "../lib/csrf.js";
+import { protect } from "../middlewares/auth.middleware.js";
+import { requireTrustedOrigin } from "../middlewares/csrf.middleware.js";
+import { authLimiter } from "../middlewares/rate-limit.middleware.js";
+
 const authRouter = Router();
+
+const parseCookies = cookieParser();
 
 authRouter.post(
   "/register",
@@ -21,14 +25,14 @@ authRouter.post(
 
 authRouter.get(
   "/csrf-token",
-  cookieParser(),
+  parseCookies,
   authController.csrfToken,
 );
 
 authRouter.post(
   "/refresh",
   authLimiter,
-  cookieParser(),
+  parseCookies,
   requireTrustedOrigin,
   doubleCsrfProtection,
   authController.refresh,
@@ -36,7 +40,7 @@ authRouter.post(
 
 authRouter.post(
   "/logout",
-  cookieParser(),
+  parseCookies,
   requireTrustedOrigin,
   doubleCsrfProtection,
   authController.logout,
