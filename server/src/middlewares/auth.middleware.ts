@@ -5,18 +5,7 @@ import type {
 } from "express";
 import { prisma } from "../lib/prisma.js";
 import { verifyAccessToken } from "../utils/jwt.js";
-import "express-serve-static-core";
 
-declare module "express-serve-static-core" {
-  interface Request {
-    user?: {
-      id: string;
-      role: string;
-    };
-  }
-}
-
-export {};
 
 function getBearerToken(
   authorizationHeader: string | undefined,
