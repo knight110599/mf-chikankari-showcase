@@ -34,20 +34,7 @@ function getBearerToken(
 }
 
 function getAccessToken(req: Request): string | null {
-  const bearerToken = getBearerToken(
-    req.headers.authorization,
-  );
-
-  if (bearerToken) {
-    return bearerToken;
-  }
-
-  const cookieToken =
-    req.cookies?.accessToken;
-
-  return typeof cookieToken === "string"
-    ? cookieToken
-    : null;
+  return getBearerToken(req.headers.authorization);
 }
 
 async function getAuthenticatedUser(token: string) {

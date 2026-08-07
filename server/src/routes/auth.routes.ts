@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as authController from "../controllers/auth.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { authLimiter } from "../middlewares/rate-limit.middleware.js";
+import { requireTrustedOrigin } from "../middlewares/csrf.middleware.js";
 const authRouter = Router();
 
 authRouter.post(
@@ -19,15 +20,15 @@ authRouter.post(
 authRouter.post(
   "/refresh",
   authLimiter,
+  requireTrustedOrigin,
   authController.refresh,
 );
 authRouter.get("/me", protect, authController.me);
-authRouter.post("/logout", authController.logout);
 
 authRouter.post(
-  "/logout-all",
-  protect,
-  authController.logoutAll,
+  "/logout",
+  requireTrustedOrigin,
+  authController.logout,
 );
 
 export default authRouter;
