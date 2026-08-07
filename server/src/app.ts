@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -27,7 +26,6 @@ app.use(
     extended: true,
   }),
 );
-app.use(cookieParser());
 
 if (
   process.env.NODE_ENV === "development"

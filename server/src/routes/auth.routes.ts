@@ -1,4 +1,5 @@
 import { Router } from "express";
+import cookieParser from "cookie-parser";
 import * as authController from "../controllers/auth.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { authLimiter } from "../middlewares/rate-limit.middleware.js";
@@ -20,15 +21,28 @@ authRouter.post(
 authRouter.post(
   "/refresh",
   authLimiter,
+  cookieParser(),
   requireTrustedOrigin,
   authController.refresh,
 );
-authRouter.get("/me", protect, authController.me);
 
 authRouter.post(
   "/logout",
+  cookieParser(),
   requireTrustedOrigin,
   authController.logout,
+);
+
+authRouter.get(
+  "/me",
+  protect,
+  authController.me,
+);
+
+authRouter.post(
+  "/logout-all",
+  protect,
+  authController.logoutAll,
 );
 
 export default authRouter;
