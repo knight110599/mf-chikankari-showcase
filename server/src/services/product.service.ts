@@ -56,7 +56,7 @@ export async function createProduct(
       shortDescription: input.shortDescription || null,
       description: input.description || null,
       price: new Prisma.Decimal(input.price),
-      wwholesalePrice:
+      wholesalePrice:
   input.wholesalePrice === undefined ||
   input.wholesalePrice === null
     ? null
