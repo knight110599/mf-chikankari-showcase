@@ -136,8 +136,14 @@ export async function loginUser(input: LoginInput) {
     role: user.role,
   };
 
-  const accessToken = generateAccessToken(tokenPayload);
-  const refreshToken = generateRefreshToken(tokenPayload);
+  const sessionId = crypto.randomUUID();
+
+const accessToken = generateAccessToken(tokenPayload);
+
+const refreshToken = generateRefreshToken({
+  ...tokenPayload,
+  sessionId,
+});
 
   const refreshTokenHash = crypto
     .createHash("sha256")
@@ -238,7 +244,11 @@ export async function refreshUserSession(refreshToken: string) {
   };
 
   const newAccessToken = generateAccessToken(tokenPayload);
-  const newRefreshToken = generateRefreshToken(tokenPayload);
+
+const newRefreshToken = generateRefreshToken({
+  ...tokenPayload,
+  sessionId: payload.sessionId,
+});
 
   const newRefreshTokenHash = crypto
     .createHash("sha256")

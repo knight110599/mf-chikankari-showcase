@@ -46,6 +46,13 @@ interface RefreshResponse {
   };
 }
 
+interface CsrfResponse {
+  success: boolean;
+  data?: {
+    csrfToken?: string;
+  };
+}
+
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "http://localhost:5000/api";
@@ -130,6 +137,29 @@ async function parseResponse<T>(
   return (await response.json()) as T;
 }
 
+async function getCsrfToken(): Promise<string> {
+  const response = await fetch(
+    `${API_URL}/auth/csrf-token`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  const result =
+    await parseResponse<CsrfResponse>(response);
+
+  const csrfToken = result.data?.csrfToken;
+
+  if (!response.ok || !result.success || !csrfToken) {
+    throw new Error(
+      "Unable to initialize CSRF protection.",
+    );
+  }
+
+  return csrfToken;
+}
+
 export function AuthProvider({
   children,
 }: AuthProviderProps) {
@@ -164,6 +194,8 @@ export function AuthProvider({
             return;
           }
 
+          const csrfToken = await getCsrfToken();
+
           const response = await fetch(
             `${API_URL}/auth/refresh`,
             {
@@ -171,6 +203,7 @@ export function AuthProvider({
               credentials: "include",
               headers: {
                 "Content-Type": "application/json",
+                "x-csrf-token": csrfToken,
               },
             },
           );
@@ -375,18 +408,25 @@ export function AuthProvider({
   );
 
   const logout = useCallback(() => {
-    void fetch(`${API_URL}/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).catch((error) => {
-      console.error(
-        "Logout request failed:",
-        error,
-      );
-    });
+    void (async () => {
+      try {
+        const csrfToken = await getCsrfToken();
+
+        await fetch(`${API_URL}/auth/logout`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            "x-csrf-token": csrfToken,
+          },
+        });
+      } catch (error) {
+        console.error(
+          "Logout request failed:",
+          error,
+        );
+      }
+    })();
 
     clearStoredAuth();
     setUser(null);

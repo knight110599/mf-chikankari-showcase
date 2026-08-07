@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { generateCsrfToken } from "../lib/csrf.js";
 import {
   getCurrentUser,
   loginUser,
@@ -72,7 +73,19 @@ export const register = async (
     });
   }
 };
+export const csrfToken = (
+  req: Request,
+  res: Response,
+): void => {
+  const token = generateCsrfToken(req, res);
 
+  res.status(200).json({
+    success: true,
+    data: {
+      csrfToken: token,
+    },
+  });
+};
 export const login = async (
   req: Request,
   res: Response,

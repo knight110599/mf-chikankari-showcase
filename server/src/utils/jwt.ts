@@ -22,9 +22,12 @@ export const generateAccessToken = (
     expiresIn: "15m",
   });
 };
+export interface RefreshTokenPayload extends AuthTokenPayload {
+  sessionId: string;
+}
 
 export const generateRefreshToken = (
-  payload: AuthTokenPayload,
+  payload: RefreshTokenPayload,
 ): string => {
   return jwt.sign(payload, refreshSecret, {
     expiresIn: "7d",
@@ -42,9 +45,8 @@ export const verifyAccessToken = (
 
 export const verifyRefreshToken = (
   token: string,
-): AuthTokenPayload => {
+): RefreshTokenPayload => {
   return jwt.verify(
-    token,
-    refreshSecret,
-  ) as AuthTokenPayload;
-};
+  token,
+  refreshSecret,
+) as RefreshTokenPayload; }

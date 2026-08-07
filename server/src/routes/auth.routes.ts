@@ -4,6 +4,7 @@ import * as authController from "../controllers/auth.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { authLimiter } from "../middlewares/rate-limit.middleware.js";
 import { requireTrustedOrigin } from "../middlewares/csrf.middleware.js";
+import { doubleCsrfProtection } from "../lib/csrf.js";
 const authRouter = Router();
 
 authRouter.post(
@@ -18,11 +19,18 @@ authRouter.post(
   authController.login,
 );
 
+authRouter.get(
+  "/csrf-token",
+  cookieParser(),
+  authController.csrfToken,
+);
+
 authRouter.post(
   "/refresh",
   authLimiter,
   cookieParser(),
   requireTrustedOrigin,
+  doubleCsrfProtection,
   authController.refresh,
 );
 
@@ -30,6 +38,7 @@ authRouter.post(
   "/logout",
   cookieParser(),
   requireTrustedOrigin,
+  doubleCsrfProtection,
   authController.logout,
 );
 
