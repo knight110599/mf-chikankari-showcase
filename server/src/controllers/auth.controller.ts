@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { generateCsrfToken } from "../lib/csrf.js";
+
 import {
   getCurrentUser,
   loginUser,
